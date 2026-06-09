@@ -1,0 +1,35 @@
+---
+title: SRCN — Arquitectura de Tres Niveles
+---
+flowchart TD
+    subgraph N1["Nivel 1 — Comisarías (SQLite · Raspberry Pi 4)"]
+        COM1["👮 Comisaría Malabo 1\nCOM-BN-001"]
+        COM2["👮 Comisaría Malabo 2\nCOM-BN-002"]
+        COM3["👮 Comisaría Bata\nCOM-LIT-001"]
+        COMN["👮 Otras Comisarías\n..."]
+    end
+
+    subgraph N2["Nivel 2 — Nodos Provinciales (MySQL · Mini-PC x86)"]
+        NODBN["🏛️ Nodo Bioko Norte\n10.10.0.1"]
+        NODLIT["🏛️ Nodo Litoral\n10.10.2.1"]
+        NODREST["🏛️ Otros Nodos\n10.10.x.1"]
+        NODANB["🏝️ Nodo Annobón\n10.10.6.1 · Satélite"]
+    end
+
+    subgraph N3["Nivel 3 — Servidor Central (MySQL · Rack · Ministerio del Interior)"]
+        CENTRAL["🏛️ Servidor Central Nacional\n10.0.0.1 · Malabo"]
+    end
+
+    COM1 -->|"sync 30s · HMAC"| NODBN
+    COM2 -->|"sync 30s · HMAC"| NODBN
+    COM3 -->|"sync 30s · HMAC"| NODLIT
+    COMN -->|"sync 30s · HMAC"| NODREST
+
+    NODBN -->|"warrant sync · mTLS"| CENTRAL
+    NODLIT -->|"warrant sync · mTLS"| CENTRAL
+    NODREST -->|"warrant sync · mTLS"| CENTRAL
+    NODANB -.->|"sync semanal · satélite"| CENTRAL
+
+    CENTRAL -->|"alerta prófugo (paralelo)"| NODBN
+    CENTRAL -->|"alerta prófugo (paralelo)"| NODLIT
+    CENTRAL -->|"alerta prófugo (paralelo)"| NODREST

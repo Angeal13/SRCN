@@ -1,0 +1,33 @@
+---
+title: SRCN — Captura de Prófugo Inter-Provincial (< 8 segundos)
+---
+sequenceDiagram
+    actor AGT as 👮 Agente (Bata)
+    participant CB as Comisaría Bata<br/>(Litoral)
+    participant NL as Nodo Provincial<br/>Litoral
+    participant MC as Ministerio<br/>Central
+    participant NBN as Nodo<br/>Bioko Norte
+    participant WBN as BD Warrants<br/>Bioko Norte
+
+    AGT->>CB: Introduce DNI del detenido
+    CB->>NL: GET /provincial/verificar/{dni}
+    NL-->>NL: Busca en índice local
+    NL-->>CB: Sin resultados locales
+
+    CB->>NL: POST /provincial/verificar-nacional
+    NL->>MC: POST /api/nacional/verificar (mTLS)
+
+    MC-->>MC: Consulta índice nacional
+    Note over MC: Sujeto encontrado.<br/>Warrant activo en Bioko Norte.
+
+    MC->>NBN: GET /provincial/expediente/{uuid} (mTLS)
+    NBN->>WBN: SELECT warrant activo
+    WBN-->>NBN: Warrant + expediente completo
+    NBN-->>MC: Expediente completo
+
+    MC-->>NL: warrant_activo: true · urgencia: CRITICO
+    NL-->>CB: DETENER — Warrant activo
+    CB-->>AGT: 🚨 DETENER — warrant BN activo
+
+    Note over MC: Propagación automática a todas las provincias
+    MC--)NBN: POST /provincial/recibir-alerta [CAPTURADO]

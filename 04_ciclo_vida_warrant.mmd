@@ -1,0 +1,14 @@
+---
+title: SRCN — Ciclo de Vida de un Warrant
+---
+stateDiagram-v2
+    [*] --> Emitido : Inspector / Jefe crea la orden
+    Emitido --> Activo : Validación judicial completada
+    Activo --> Propagado : Nodo provincial notifica al central
+    Propagado --> AlertaNacional : Central difunde a las 7 provincias en paralelo
+    AlertaNacional --> Ejecutado : Sujeto capturado en cualquier provincia
+    AlertaNacional --> Expirado : Fecha de expiración superada
+    Activo --> Cancelado : Jefe cancela con motivo registrado
+    Ejecutado --> [*]
+    Expirado --> [*]
+    Cancelado --> [*]

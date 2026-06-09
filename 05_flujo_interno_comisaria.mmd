@@ -1,0 +1,43 @@
+---
+title: SRCN — Flujo Interno del Nodo Comisaría
+---
+flowchart LR
+    subgraph TERM["Terminales (LAN WiFi)"]
+        T1["💻 Terminal Agente 1"]
+        T2["💻 Terminal Agente 2"]
+        T3["💻 Terminal Jefe"]
+        TB["🔏 Lector Biométrico"]
+    end
+
+    subgraph APP["Aplicación Flask — Raspberry Pi 4"]
+        NGINX["Nginx Proxy"]
+        FLASK["Flask + Gunicorn"]
+        AUTH["Auth / Roles"]
+        SUJETOS["Rutas Sujetos"]
+        WARRANTS["Rutas Warrants"]
+        SYNC["Motor Sync"]
+    end
+
+    subgraph DATA["Datos Locales"]
+        DB["🗄️ SQLite\nsrcn.db"]
+        AUDIT["📋 Audit Log\n(inmutable)"]
+        QUEUE["⏳ Cola Sync"]
+    end
+
+    NODO["🏛️ Nodo Provincial\n10.10.x.1"]
+
+    T1 -->|HTTP| NGINX
+    T2 -->|HTTP| NGINX
+    T3 -->|HTTP| NGINX
+    TB -->|USB| FLASK
+
+    NGINX --> FLASK
+    FLASK --> AUTH
+    AUTH --> SUJETOS
+    AUTH --> WARRANTS
+    SUJETOS --> DB
+    WARRANTS --> DB
+    WARRANTS --> QUEUE
+    FLASK --> AUDIT
+    QUEUE --> SYNC
+    SYNC -->|"POST push-sync\nHMAC token"| NODO

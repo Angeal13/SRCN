@@ -1,0 +1,17 @@
+---
+title: SRCN — Diagrama de Contexto (Nivel 0)
+---
+flowchart TD
+    AGENTE["👮 Agente Policial"]
+    JEFE["👮‍♂️ Jefe / Inspector"]
+    JUEZ["⚖️ Juzgado / Fiscalía"]
+    MIN_UI["🏛️ Ministerio del Interior"]
+
+    SRCN(["🔐 SRCN\nSistema de Registro\nCriminal Nacional"])
+
+    AGENTE -->|"Registrar detenido\nConsultar antecedentes"| SRCN
+    JEFE -->|"Emitir warrants\nAutorizar transferencias"| SRCN
+    SRCN -->|"Historial criminal\nEstado de warrant"| AGENTE
+    SRCN -->|"Alertas prófugos\nEstadísticas nacionales"| MIN_UI
+    SRCN -->|"Exportación cifrada\nExpedientes judiciales"| JUEZ
+    JUEZ -->|"Orden judicial"| SRCN

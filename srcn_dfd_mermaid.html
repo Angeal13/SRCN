@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SRCN — Diagrama de Flujo de Datos (Mermaid)</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#070e1a;--navy2:#0c1628;--navy3:#101e34;
+  --cyan:#00c8f0;--red:#e03030;--amber:#e08820;--green:#20b060;
+  --tx:#dce8f8;--ts:#6a8aaa;--tss:#2a3a50;
+  --bd:rgba(255,255,255,.07);--bd2:rgba(255,255,255,.13);
+  --f:'Space Grotesk',sans-serif;--fm:'JetBrains Mono',monospace
+}
+html,body{min-height:100%;font-family:var(--f);background:var(--navy);color:var(--tx)}
+
+.topstrip{background:var(--navy2);border-bottom:1px solid var(--bd2);
+  padding:12px 40px;display:flex;align-items:center;gap:14px;
+  position:sticky;top:0;z-index:100}
+.badge{font-family:var(--fm);font-size:.7rem;font-weight:700;letter-spacing:2px;
+  color:var(--navy);background:var(--cyan);padding:3px 10px;border-radius:3px}
+.topstrip-name{font-size:.9rem;font-weight:600}
+.topstrip-sub{font-size:.72rem;color:var(--ts);margin-left:auto;font-family:var(--fm)}
+.restricted{font-family:var(--fm);font-size:.65rem;font-weight:700;letter-spacing:1.5px;
+  color:var(--red);border:1px solid rgba(224,48,48,.4);padding:2px 8px;border-radius:3px}
+
+.page{max-width:1200px;margin:0 auto;padding:40px}
+.section{margin-bottom:48px}
+.section-eyebrow{font-family:var(--fm);font-size:.65rem;letter-spacing:3px;
+  color:var(--cyan);text-transform:uppercase;margin-bottom:6px}
+.section-title{font-size:1.4rem;font-weight:700;margin-bottom:6px}
+.section-sub{font-size:.85rem;color:var(--ts);line-height:1.7;max-width:700px;margin-bottom:24px}
+
+.diagram-card{background:var(--navy2);border:1px solid var(--bd);border-radius:10px;overflow:hidden;margin-bottom:28px}
+.diagram-header{padding:14px 20px;border-bottom:1px solid var(--bd);
+  display:flex;align-items:center;justify-content:space-between}
+.diagram-title{font-size:.88rem;font-weight:700}
+.diagram-sub{font-size:.72rem;color:var(--ts);font-family:var(--fm)}
+.diagram-body{padding:24px;overflow-x:auto}
+.diagram-body .mermaid{display:flex;justify-content:center}
+
+.tabs{display:flex;gap:2px;border-bottom:1px solid var(--bd);padding:0 20px}
+.tab{padding:12px 16px;font-size:.8rem;font-weight:500;color:var(--ts);
+  cursor:pointer;border-bottom:2px solid transparent;transition:all .15s}
+.tab:hover{color:var(--tx)}
+.tab.on{color:var(--cyan);border-bottom-color:var(--cyan)}
+.tab-content{display:none;padding:24px}
+.tab-content.on{display:block}
+
+.legend-row{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}
+.leg{display:flex;align-items:center;gap:6px;font-size:.75rem;color:var(--ts);
+  background:rgba(255,255,255,.04);padding:4px 10px;border-radius:4px;
+  border:1px solid var(--bd)}
+.leg-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+
+.footer{text-align:center;padding:40px 20px;color:var(--tss);font-size:.75rem;
+  border-top:1px solid var(--bd)}
+.footer a{color:var(--cyan);text-decoration:none}
+</style>
+</head>
+<body>
+
+<header class="topstrip">
+  <span class="badge">SRCN</span>
+  <span class="topstrip-name">Diagrama de Flujo de Datos — Mermaid JS</span>
+  <span class="topstrip-sub">Sistema de Registro Criminal Nacional · Guinea Ecuatorial</span>
+  <span class="restricted">USO OFICIAL RESTRINGIDO</span>
+</header>
+
+<div class="page">
+
+  <div class="section">
+    <div class="section-eyebrow">Arquitectura del sistema</div>
+    <div class="section-title">Diagramas de Flujo de Datos</div>
+    <div class="section-sub">
+      Cinco diagramas cubren la arquitectura completa del SRCN: desde el flujo interno 
+      de una comisaría hasta la resolución inter-provincial de warrants y la propagación 
+      nacional de alertas de prófugos.
+    </div>
+  </div>
+
+  <!-- DIAGRAM 1: SYSTEM CONTEXT -->
+  <div class="diagram-card">
+    <div class="diagram-header">
+      <div class="diagram-title">1 — Diagrama de Contexto del Sistema</div>
+      <div class="diagram-sub">Nivel 0 — Entidades externas e interacciones principales</div>
+    </div>
+    <div class="diagram-body">
+      <div class="mermaid">
+flowchart TD
+    AGENTE["👮 Agente\nPolicial"]
+    JEFE["👮‍♂️ Jefe /\nInspector"]
+    JUEZ["⚖️ Juzgado /\nFiscalía"]
+    MINISTERIO_UI["🏛️ Ministerio\ndel Interior"]
+
+    SRCN(["🔐 SRCN\nSistema de Registro\nCriminal Nacional"])
+
+    AGENTE -->|"Registrar detenido\nConsultar antecedentes"| SRCN
+    JEFE -->|"Emitir warrants\nAutorizar transferencias"| SRCN
+    SRCN -->|"Historial criminal\nEstado warrant"| AGENTE
+    SRCN -->|"Alertas prófugos\nEstadísticas"| MINISTERIO_UI
+    SRCN -->|"Exportación cifrada\nExpedientes judiciales"| JUEZ
+    JUEZ -->|"Orden judicial"| SRCN
+
+    style SRCN fill:#0c1628,stroke:#00c8f0,stroke-width:2px,color:#dce8f8
+    style AGENTE fill:#101e34,stroke:#00c8f0,color:#dce8f8
+    style JEFE fill:#101e34,stroke:#00c8f0,color:#dce8f8
+    style JUEZ fill:#101e34,stroke:#e08820,color:#dce8f8
+    style MINISTERIO_UI fill:#101e34,stroke:#e08820,color:#dce8f8
+      </div>
+    </div>
+  </div>
+
+  <!-- DIAGRAM 2: THREE-TIER ARCHITECTURE -->
+  <div class="diagram-card">
+    <div class="diagram-header">
+      <div class="diagram-title">2 — Arquitectura de Tres Niveles</div>
+      <div class="diagram-sub">Nivel 1 — Flujo de datos entre niveles del sistema</div>
+    </div>
+    <div class="diagram-body">
+      <div class="mermaid">
+flowchart TD
+    subgraph NIVEL1["🏢 NIVEL 1 — COMISARÍAS (14 nodos)"]
+        COM1["👮 Comisaría\nMalabo 1\nSQLite · Pi 4"]
+        COM2["👮 Comisaría\nMalabo 2\nSQLite · Pi 4"]
+        COM3["👮 Comisaría\nBata\nSQLite · Pi 4"]
+        COMN["👮 Otras\nComisarías\nSQLite · Pi 4"]
+    end
+
+    subgraph NIVEL2["🏛️ NIVEL 2 — NODOS PROVINCIALES (7 nodos)"]
+        NODBN["🏛️ Nodo\nBioko Norte\nMySQL"]
+        NODLIT["🏛️ Nodo\nLitoral\nMySQL"]
+        NODREST["🏛️ Otros\nNodos\nMySQL"]
+        NODANB["🏝️ Nodo\nAnnobón\nMySQL·Sat."]
+    end
+
+    subgraph NIVEL3["🏛️ NIVEL 3 — SERVIDOR CENTRAL (Ministerio del Interior)"]
+        CENTRAL["🏛️ Servidor Central\nÍndice Nacional\nMySQL · Rack · Malabo"]
+    end
+
+    COM1 -->|"sync 30s\nHMAC token"| NODBN
+    COM2 -->|"sync 30s"| NODBN
+    COM3 -->|"sync 30s"| NODLIT
+    COMN -->|"sync 30s"| NODREST
+
+    NODBN -->|"warrant sync\nmTLS"| CENTRAL
+    NODLIT -->|"warrant sync\nmTLS"| CENTRAL
+    NODREST -->|"warrant sync\nmTLS"| CENTRAL
+    NODANB -.->|"sync semanal\nsatélite"| CENTRAL
+
+    CENTRAL -->|"alerta prófugo\n(paralelo)"| NODBN
+    CENTRAL -->|"alerta prófugo\n(paralelo)"| NODLIT
+    CENTRAL -->|"alerta prófugo\n(paralelo)"| NODREST
+
+    style NIVEL1 fill:#070e1a,stroke:#00c8f0,stroke-width:1px,color:#6a8aaa
+    style NIVEL2 fill:#070e1a,stroke:#4da8ff,stroke-width:1px,color:#6a8aaa
+    style NIVEL3 fill:#070e1a,stroke:#e08820,stroke-width:1px,color:#6a8aaa
+    style CENTRAL fill:#0c1628,stroke:#e08820,stroke-width:2px,color:#dce8f8
+    style NODANB fill:#101e34,stroke:#e03030,color:#dce8f8
+      </div>
+    </div>
+  </div>
+
+  <!-- DIAGRAM 3: FUGITIVE CAPTURE FLOW -->
+  <div class="diagram-card">
+    <div class="diagram-header">
+      <div class="diagram-title">3 — Flujo de Captura de Prófugo Inter-Provincial</div>
+      <div class="diagram-sub">Nivel 2 — Proceso completo · Objetivo: &lt; 8 segundos</div>
+    </div>
+    <div class="diagram-body">
+      <div class="mermaid">
+sequenceDiagram
+    actor AGT as 👮 Agente (Bata)
+    participant CB as Comisaría Bata<br/>(Litoral)
+    participant NL as Nodo Provincial<br/>Litoral
+    participant MC as Ministerio<br/>Central
+    participant NBN as Nodo Bioko Norte
+    participant WBN as BD Warrants<br/>Bioko Norte
+
+    AGT->>CB: Introduce DNI del detenido
+    CB->>NL: GET /provincial/verificar/{dni}<br/>X-SRCN-Token
+    NL-->>NL: Busca en índice local...
+    NL-->>CB: Sin resultados locales
+
+    CB->>NL: POST /provincial/verificar-nacional
+    NL->>MC: POST /api/nacional/verificar<br/>mTLS cert Litoral
+
+    MC-->>MC: Consulta índice nacional...
+    Note over MC: Sujeto encontrado.<br/>Warrant activo en Bioko Norte.
+
+    MC->>NBN: GET /provincial/expediente/{uuid}<br/>mTLS cert Central
+    NBN->>WBN: SELECT warrant WHERE estado=activo
+    WBN-->>NBN: Warrant activo + expediente
+    NBN-->>MC: Expediente completo
+
+    MC-->>NL: warrant_activo:true<br/>provincia_emisora:BN<br/>urgencia:CRITICO
+    NL-->>CB: DETENER — Warrant activo
+    CB-->>AGT: 🚨 DETENER — OBAMA, P.<br/>Warrant BN·EXP-2025-00234
+
+    Note over MC: Propagación automática a todas las provincias
+    MC--)NBN: POST /provincial/recibir-alerta [CAPTURADO]
+      </div>
+    </div>
+  </div>
+
+  <!-- DIAGRAM 4: WARRANT LIFECYCLE -->
+  <div class="diagram-card">
+    <div class="diagram-header">
+      <div class="diagram-title">4 — Ciclo de Vida de un Warrant</div>
+      <div class="diagram-sub">Nivel 2 — Estados y transiciones de una orden de arresto</div>
+    </div>
+    <div class="diagram-body">
+      <div class="mermaid">
+stateDiagram-v2
+    [*] --> Emitido : Inspector / Jefe emite orden
+    Emitido --> Activo : Validación judicial
+    Activo --> Propagado : Nodo provincial recibe\ny notifica a central
+    Propagado --> AlertaNacional : Central difunde a\ntodas las provincias
+    AlertaNacional --> Ejecutado : Sujeto capturado\nen cualquier provincia
+    AlertaNacional --> Expirado : Fecha de expiración\nsuperada
+    Activo --> Cancelado : Jefe cancela\n(con motivo registrado)
+    Ejecutado --> [*]
+    Expirado --> [*]
+    Cancelado --> [*]
+
+    note right of AlertaNacional
+        Alerta ligera enviada
+        a 7 provincias en
+        paralelo < 3 segundos
+    end note
+
+    note right of Ejecutado
+        Audit log inmutable:
+        quién, cuándo, dónde
+        fue capturado
+    end note
+      </div>
+    </div>
+  </div>
+
+  <!-- DIAGRAM 5: INTERNAL COMISARIA FLOW -->
+  <div class="diagram-card">
+    <div class="diagram-header">
+      <div class="diagram-title">5 — Flujo Interno del Nodo Comisaría</div>
+      <div class="diagram-sub">Nivel 2 — Componentes internos y flujo de datos local</div>
+    </div>
+    <div class="diagram-body">
+      <div class="mermaid">
+flowchart LR
+    subgraph TERMINALES["💻 Terminales (LAN WiFi)"]
+        T1["Terminal\nAgente 1"]
+        T2["Terminal\nAgente 2"]
+        T3["Terminal\nJefe"]
+        TB["Lector\nBiométrico"]
+    end
+
+    subgraph APP["🐍 Aplicación Flask (Pi 4)"]
+        NGINX["Nginx\nProxy"]
+        FLASK["Flask +\nGunicorn"]
+        AUTH["Módulo\nAuth / JWT"]
+        SUJETOS["Rutas\nSujetos"]
+        WARRANTS["Rutas\nWarrants"]
+        SYNC["Motor\nSync"]
+    end
+
+    subgraph DATOS["🗄️ Datos Locales"]
+        DB["SQLite\nsrcn.db"]
+        AUDIT["Audit\nLog"]
+        QUEUE["Cola\nSync"]
+    end
+
+    NODO["🏛️ Nodo\nProvincial"]
+
+    T1 -->|"HTTP 80"| NGINX
+    T2 -->|"HTTP 80"| NGINX
+    T3 -->|"HTTP 80"| NGINX
+    TB -->|"USB"| FLASK
+
+    NGINX --> FLASK
+    FLASK --> AUTH
+    AUTH --> SUJETOS
+    AUTH --> WARRANTS
+    SUJETOS --> DB
+    WARRANTS --> DB
+    WARRANTS --> QUEUE
+    FLASK --> AUDIT
+
+    SYNC -->|"POST push-sync\nHMAC token"| NODO
+    QUEUE --> SYNC
+
+    style APP fill:#070e1a,stroke:#00c8f0,stroke-width:1px,color:#6a8aaa
+    style DATOS fill:#070e1a,stroke:#4da8ff,stroke-width:1px,color:#6a8aaa
+    style TERMINALES fill:#070e1a,stroke:#20b060,stroke-width:1px,color:#6a8aaa
+      </div>
+    </div>
+  </div>
+
+  <div class="legend-row">
+    <div class="leg"><div class="leg-dot" style="background:#00c8f0"></div>Nivel 1 — Comisaría</div>
+    <div class="leg"><div class="leg-dot" style="background:#4da8ff"></div>Nivel 2 — Nodo Provincial</div>
+    <div class="leg"><div class="leg-dot" style="background:#e08820"></div>Nivel 3 — Ministerio Central</div>
+    <div class="leg"><div class="leg-dot" style="background:#e03030"></div>Alerta / Warrant activo</div>
+    <div class="leg"><div class="leg-dot" style="background:#20b060"></div>Captura confirmada</div>
+    <div class="leg"><div class="leg-dot" style="background:#6a8aaa"></div>Flujo satelital (Annobón)</div>
+  </div>
+
+</div>
+
+<footer class="footer">
+  <div>SRCN — Sistema de Registro Criminal Nacional · República de Guinea Ecuatorial</div>
+  <div style="margin-top:6px">Desarrollado por <strong style="color:var(--tx)">BP Technology</strong> · 2026</div>
+  <div style="margin-top:12px;display:flex;justify-content:center;gap:16px;flex-wrap:wrap">
+    <a href="https://github.com/Angeal13/srcn-comisaria" target="_blank">srcn-comisaria</a>
+    <a href="https://github.com/Angeal13/srcn-nodo-provincial" target="_blank">srcn-nodo-provincial</a>
+    <a href="https://github.com/Angeal13/srcn-ministerio" target="_blank">srcn-ministerio</a>
+    <a href="https://github.com/Angeal13/srcn-annobon" target="_blank">srcn-annobon</a>
+  </div>
+  <div style="margin-top:14px;font-size:.65rem;color:var(--tss);letter-spacing:1px">
+    USO OFICIAL RESTRINGIDO — ACCESO NO AUTORIZADO PROHIBIDO
+  </div>
+</footer>
+
+<script>
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: 'dark',
+    themeVariables: {
+      background: '#070e1a',
+      mainBkg: '#0c1628',
+      nodeBorder: '#00c8f0',
+      clusterBkg: '#070e1a',
+      titleColor: '#dce8f8',
+      edgeLabelBackground: '#0c1628',
+      lineColor: '#3a5a7a',
+      primaryColor: '#0c1628',
+      primaryTextColor: '#dce8f8',
+      primaryBorderColor: '#00c8f0',
+      secondaryColor: '#101e34',
+      tertiaryColor: '#162540',
+      fontFamily: 'Space Grotesk, sans-serif',
+      fontSize: '13px',
+    },
+    flowchart: { curve: 'basis', padding: 20 },
+    sequence: { actorMargin: 60, messageMargin: 30 },
+  });
+</script>
+</body>
+</html>

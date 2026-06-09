@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SRCN — Repositorios · Guinea Ecuatorial</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#070e1a;--navy2:#0c1628;--navy3:#101e34;--navy4:#162540;
+  --cyan:#00c8f0;--cyan2:#00a0c0;
+  --red:#e03030;--amber:#e08820;--green:#20b060;
+  --tx:#dce8f8;--ts:#6a8aaa;--tss:#2a3a50;
+  --bd:rgba(255,255,255,.07);--bd2:rgba(255,255,255,.13);
+  --f:'Space Grotesk',sans-serif;--fm:'JetBrains Mono',monospace;
+  --r:8px;--shadow:0 8px 40px rgba(0,0,0,.6)
+}
+html,body{min-height:100%;font-family:var(--f);background:var(--navy);color:var(--tx);line-height:1.6}
+
+/* ── TOP STRIP ── */
+.topstrip{
+  background:var(--navy2);border-bottom:1px solid var(--bd2);
+  padding:12px 40px;display:flex;align-items:center;gap:16px;
+  position:sticky;top:0;z-index:100;
+}
+.badge{font-family:var(--fm);font-size:.7rem;font-weight:700;letter-spacing:2px;
+  color:var(--navy);background:var(--cyan);padding:3px 10px;border-radius:3px}
+.topstrip-name{font-size:.9rem;font-weight:600;letter-spacing:-.2px}
+.topstrip-sub{font-size:.72rem;color:var(--ts);margin-left:auto;font-family:var(--fm)}
+.restricted{font-family:var(--fm);font-size:.65rem;font-weight:700;letter-spacing:1.5px;
+  color:var(--red);border:1px solid rgba(224,48,48,.4);padding:2px 8px;border-radius:3px}
+
+/* ── HERO ── */
+.hero{
+  padding:80px 40px 60px;
+  text-align:center;
+  background:radial-gradient(ellipse 80% 60% at 50% 0%, rgba(0,200,240,.06) 0%, transparent 70%);
+  border-bottom:1px solid var(--bd);
+}
+.hero-eyebrow{font-family:var(--fm);font-size:.72rem;letter-spacing:3px;color:var(--cyan);
+  text-transform:uppercase;margin-bottom:16px}
+.hero-title{font-size:3rem;font-weight:700;letter-spacing:-.5px;line-height:1.1;margin-bottom:16px}
+.hero-title span{color:var(--cyan)}
+.hero-sub{font-size:1rem;color:var(--ts);max-width:640px;margin:0 auto 40px;line-height:1.8}
+.hero-stats{display:flex;justify-content:center;gap:40px;flex-wrap:wrap;margin-top:40px}
+.hstat{text-align:center}
+.hstat-val{font-family:var(--fm);font-size:2rem;font-weight:700;color:var(--cyan)}
+.hstat-lbl{font-size:.72rem;color:var(--ts);letter-spacing:.5px;margin-top:4px}
+
+/* ── SECTION ── */
+.section{padding:60px 40px;border-bottom:1px solid var(--bd)}
+.section-label{font-family:var(--fm);font-size:.65rem;letter-spacing:3px;color:var(--cyan);
+  text-transform:uppercase;margin-bottom:8px}
+.section-title{font-size:1.5rem;font-weight:700;margin-bottom:6px}
+.section-sub{font-size:.88rem;color:var(--ts);margin-bottom:32px;max-width:700px;line-height:1.7}
+
+/* ── REPOS GRID ── */
+.repos-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px}
+.repo-card{
+  background:var(--navy2);border:1px solid var(--bd);border-radius:var(--r);
+  padding:24px;transition:border-color .2s,transform .2s;
+  display:flex;flex-direction:column;gap:12px;
+  position:relative;overflow:hidden;
+}
+.repo-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;
+  background:var(--accent,var(--cyan))}
+.repo-card:hover{border-color:var(--bd2);transform:translateY(-2px)}
+.repo-card.comisaria{--accent:var(--cyan)}
+.repo-card.provincial{--accent:#4da8ff}
+.repo-card.ministerio{--accent:var(--amber)}
+.repo-card.annobon{--accent:var(--red)}
+
+.repo-icon{font-size:1.8rem;margin-bottom:4px}
+.repo-level{font-family:var(--fm);font-size:.65rem;letter-spacing:2px;
+  color:var(--accent,var(--cyan));text-transform:uppercase;font-weight:700}
+.repo-name{font-size:1rem;font-weight:700;color:var(--tx)}
+.repo-desc{font-size:.82rem;color:var(--ts);line-height:1.6;flex:1}
+.repo-meta{display:flex;flex-wrap:wrap;gap:6px}
+.tag{font-size:.65rem;font-family:var(--fm);padding:2px 7px;border-radius:3px;
+  background:rgba(255,255,255,.06);color:var(--ts);border:1px solid var(--bd)}
+.repo-link{
+  display:inline-flex;align-items:center;gap:6px;
+  font-size:.78rem;font-weight:600;color:var(--cyan);
+  border:1px solid rgba(0,200,240,.3);padding:7px 14px;border-radius:5px;
+  text-decoration:none;transition:all .15s;margin-top:4px;
+  background:rgba(0,200,240,.05);
+}
+.repo-link:hover{background:rgba(0,200,240,.12);border-color:var(--cyan);color:var(--cyan)}
+.repo-link svg{flex-shrink:0}
+
+/* ── ARCHITECTURE FLOW ── */
+.arch-flow{
+  display:flex;align-items:center;justify-content:center;
+  gap:0;flex-wrap:wrap;margin:32px 0;
+}
+.arch-node{
+  background:var(--navy2);border:1px solid var(--bd2);border-radius:var(--r);
+  padding:16px 20px;text-align:center;min-width:160px;
+  position:relative;
+}
+.arch-node-icon{font-size:1.5rem;margin-bottom:4px}
+.arch-node-title{font-size:.8rem;font-weight:700;color:var(--tx)}
+.arch-node-sub{font-size:.68rem;color:var(--ts);font-family:var(--fm);margin-top:2px}
+.arch-arrow{
+  display:flex;flex-direction:column;align-items:center;
+  padding:0 8px;color:var(--ts);font-size:.65rem;
+  font-family:var(--fm);gap:3px;
+}
+.arch-arrow-line{width:40px;height:2px;background:linear-gradient(90deg,var(--cyan2),var(--cyan));
+  position:relative;}
+.arch-arrow-line::after{content:'▶';position:absolute;right:-6px;top:-7px;
+  font-size:.6rem;color:var(--cyan)}
+.arch-node.comisaria{border-color:rgba(0,200,240,.3)}
+.arch-node.provincial{border-color:rgba(77,168,255,.3)}
+.arch-node.ministerio{border-color:rgba(224,136,32,.3)}
+.arch-node.annobon{border-color:rgba(224,48,48,.3)}
+
+/* ── DFD DIAGRAM ── */
+.dfd-wrap{
+  background:var(--navy2);border:1px solid var(--bd);border-radius:var(--r);
+  overflow:hidden;margin-top:8px;
+}
+.dfd-header{
+  padding:14px 20px;border-bottom:1px solid var(--bd);
+  display:flex;align-items:center;gap:10px;
+}
+.dfd-header-title{font-size:.85rem;font-weight:600}
+.dfd-header-sub{font-size:.72rem;color:var(--ts);margin-left:auto;font-family:var(--fm)}
+.dfd-canvas{width:100%;overflow-x:auto}
+canvas#dfdCanvas{display:block;background:var(--navy3)}
+
+/* ── FLOW TABLE ── */
+.flow-table{width:100%;border-collapse:collapse;font-size:.82rem}
+.flow-table th{background:var(--navy3);color:var(--ts);font-size:.68rem;
+  font-weight:700;letter-spacing:.8px;text-transform:uppercase;
+  padding:10px 14px;text-align:left;border-bottom:1px solid var(--bd2)}
+.flow-table td{padding:10px 14px;border-bottom:1px solid var(--bd);color:var(--tx);
+  vertical-align:middle}
+.flow-table tr:hover td{background:rgba(255,255,255,.02)}
+.flow-table tr:last-child td{border-bottom:none}
+.mono{font-family:var(--fm);font-size:.72rem;color:var(--ts)}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;vertical-align:middle}
+
+/* ── TECH STACK ── */
+.tech-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px}
+.tech-item{background:var(--navy2);border:1px solid var(--bd);border-radius:var(--r);
+  padding:16px;display:flex;align-items:flex-start;gap:12px}
+.tech-icon{font-size:1.5rem;flex-shrink:0}
+.tech-name{font-size:.85rem;font-weight:600;color:var(--tx)}
+.tech-role{font-size:.72rem;color:var(--ts);margin-top:2px;line-height:1.5}
+
+/* ── FOOTER ── */
+.footer{padding:40px;text-align:center;color:var(--tss);font-size:.78rem}
+.footer a{color:var(--cyan);text-decoration:none}
+
+/* ── UTILS ── */
+.flex{display:flex}.items-center{align-items:center}.gap-2{gap:8px}
+@media(max-width:600px){
+  .hero{padding:50px 20px 40px}.hero-title{font-size:2rem}
+  .section{padding:40px 20px}.topstrip{padding:10px 20px}
+  .hero-stats{gap:24px}
+}
+</style>
+</head>
+<body>
+
+<!-- TOP STRIP -->
+<header class="topstrip">
+  <span class="badge">SRCN</span>
+  <span class="topstrip-name">Sistema de Registro Criminal Nacional</span>
+  <span class="topstrip-sub">República de Guinea Ecuatorial · Ministerio del Interior</span>
+  <span class="restricted">USO OFICIAL RESTRINGIDO</span>
+</header>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-eyebrow">República de Guinea Ecuatorial · BP Technology · 2026</div>
+  <h1 class="hero-title">Sistema de Registro<br><span>Criminal Nacional</span></h1>
+  <p class="hero-sub">
+    Plataforma de tres niveles para la digitalización del registro criminal nacional, 
+    operada exclusivamente sobre intranet nacional segura. Elimina la brecha de 
+    información inter-provincial que permite a delincuentes evadir órdenes de arresto 
+    cruzando fronteras provinciales.
+  </p>
+  <div class="hero-stats">
+    <div class="hstat"><div class="hstat-val">3</div><div class="hstat-lbl">Niveles de arquitectura</div></div>
+    <div class="hstat"><div class="hstat-val">7</div><div class="hstat-lbl">Provincias cubiertas</div></div>
+    <div class="hstat"><div class="hstat-val">&lt;8s</div><div class="hstat-lbl">Consulta inter-provincial</div></div>
+    <div class="hstat"><div class="hstat-val">4</div><div class="hstat-lbl">Repositorios de código</div></div>
+    <div class="hstat"><div class="hstat-val">0</div><div class="hstat-lbl">Costo de licencias</div></div>
+  </div>
+</section>
+
+<!-- REPOS -->
+<section class="section">
+  <div class="section-label">Código fuente</div>
+  <div class="section-title">Repositorios GitHub</div>
+  <div class="section-sub">
+    Cuatro repositorios independientes — uno por tipo de nodo. Cada uno se despliega 
+    en su hardware correspondiente con un único script de instalación. El código es 
+    idéntico en base; la diferencia está en la configuración <code style="font-family:var(--fm);font-size:.8em;color:var(--cyan)">.env</code> por máquina.
+  </div>
+
+  <div class="repos-grid">
+
+    <div class="repo-card comisaria">
+      <div class="repo-icon">👮</div>
+      <div class="repo-level">Nivel 1 — Estación Policial</div>
+      <div class="repo-name">srcn-comisaria</div>
+      <div class="repo-desc">
+        Nodo local instalado en cada comisaría o puesto policial. Opera con SQLite sin 
+        servidor de base de datos. Gestiona booking de detenidos, consulta de antecedentes, 
+        emisión de warrants y sincronización automática con el nodo provincial cada 30 segundos.
+        Funciona completamente offline — conectividad solo para sync.
+      </div>
+      <div class="repo-meta">
+        <span class="tag">Flask 3</span><span class="tag">SQLite</span>
+        <span class="tag">Raspberry Pi 4</span><span class="tag">Jinja2</span>
+        <span class="tag">APScheduler</span>
+      </div>
+      <a href="https://github.com/Angeal13/srcn-comisaria" target="_blank" class="repo-link">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+        Angeal13/srcn-comisaria
+      </a>
+    </div>
+
+    <div class="repo-card provincial">
+      <div class="repo-icon">🏛️</div>
+      <div class="repo-level">Nivel 2 — Nodo Provincial</div>
+      <div class="repo-name">srcn-nodo-provincial</div>
+      <div class="repo-desc">
+        Un servidor por provincia (7 en total). Agrega datos de todas las comisarías 
+        de su zona, resuelve consultas de warrants intra-provinciales en menos de 1 segundo, 
+        escala al servidor central para consultas inter-provinciales, y retransmite alertas 
+        de prófugos a todas las comisarías locales.
+      </div>
+      <div class="repo-meta">
+        <span class="tag">Flask 3</span><span class="tag">MySQL 8</span>
+        <span class="tag">Mini-PC x86</span><span class="tag">ThreadPoolExecutor</span>
+        <span class="tag">mTLS</span>
+      </div>
+      <a href="https://github.com/Angeal13/srcn-nodo-provincial" target="_blank" class="repo-link">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+        Angeal13/srcn-nodo-provincial
+      </a>
+    </div>
+
+    <div class="repo-card ministerio">
+      <div class="repo-icon">🏛️</div>
+      <div class="repo-level">Nivel 3 — Servidor Central</div>
+      <div class="repo-name">srcn-ministerio</div>
+      <div class="repo-desc">
+        Servidor único nacional en Malabo (Ministerio del Interior). Mantiene el índice 
+        nacional de sujetos y warrants. Resuelve consultas inter-provinciales localizando 
+        el nodo correcto y devolviendo el expediente completo en menos de 8 segundos. 
+        Propaga alertas a las 7 provincias en paralelo.
+      </div>
+      <div class="repo-meta">
+        <span class="tag">Flask 3</span><span class="tag">MySQL 8</span>
+        <span class="tag">Servidor Rack</span><span class="tag">Índice Nacional</span>
+        <span class="tag">Dashboard Ministerio</span>
+      </div>
+      <a href="https://github.com/Angeal13/srcn-ministerio" target="_blank" class="repo-link">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+        Angeal13/srcn-ministerio
+      </a>
+    </div>
+
+    <div class="repo-card annobon">
+      <div class="repo-icon">🏝️</div>
+      <div class="repo-level">Nivel 2 — Caso Especial</div>
+      <div class="repo-name">srcn-annobon</div>
+      <div class="repo-desc">
+        Nodo adaptado para la isla de Annobón con conectividad satelital limitada. 
+        Mismo código base que el nodo provincial pero configurado para sincronización 
+        semanal o manual. Opera completamente autónomo cuando el enlace satelital 
+        no está disponible. Opciones de sync: semanal, manual o satelital.
+      </div>
+      <div class="repo-meta">
+        <span class="tag">Flask 3</span><span class="tag">MySQL 8</span>
+        <span class="tag">Sync Semanal</span><span class="tag">Satelital</span>
+        <span class="tag">Offline-first</span>
+      </div>
+      <a href="https://github.com/Angeal13/srcn-annobon" target="_blank" class="repo-link">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+        Angeal13/srcn-annobon
+      </a>
+    </div>
+
+  </div>
+</section>
+
+<!-- ARCHITECTURE -->
+<section class="section">
+  <div class="section-label">Arquitectura</div>
+  <div class="section-title">Flujo de Tres Niveles</div>
+  <div class="section-sub">
+    Cada nivel habla exclusivamente con el nivel adyacente. Las comisarías nunca 
+    contactan al servidor central directamente — siempre a través de su nodo provincial. 
+    Toda comunicación ocurre dentro de la intranet nacional, sin exposición a internet público.
+  </div>
+
+  <div class="arch-flow">
+    <div class="arch-node comisaria">
+      <div class="arch-node-icon">👮</div>
+      <div class="arch-node-title">Comisaría</div>
+      <div class="arch-node-sub">SQLite · Pi 4<br>10.20.x.x</div>
+    </div>
+    <div class="arch-arrow">
+      <div class="arch-arrow-line"></div>
+      <span style="font-size:.6rem;color:var(--ts)">sync 30s</span>
+    </div>
+    <div class="arch-node provincial">
+      <div class="arch-node-icon">🏛️</div>
+      <div class="arch-node-title">Nodo Provincial</div>
+      <div class="arch-node-sub">MySQL · x86<br>10.10.x.1</div>
+    </div>
+    <div class="arch-arrow">
+      <div class="arch-arrow-line"></div>
+      <span style="font-size:.6rem;color:var(--ts)">bajo demanda</span>
+    </div>
+    <div class="arch-node ministerio">
+      <div class="arch-node-icon">🏛️</div>
+      <div class="arch-node-title">Ministerio Central</div>
+      <div class="arch-node-sub">MySQL · Rack<br>10.0.0.1</div>
+    </div>
+    <div class="arch-arrow" style="opacity:.4">
+      <div class="arch-arrow-line" style="background:rgba(224,48,48,.5)"></div>
+      <span style="font-size:.6rem;color:var(--ts)">satelital</span>
+    </div>
+    <div class="arch-node annobon">
+      <div class="arch-node-icon">🏝️</div>
+      <div class="arch-node-title">Annobón</div>
+      <div class="arch-node-sub">MySQL · semanal<br>10.10.6.1</div>
+    </div>
+  </div>
+
+  <!-- DFD Canvas -->
+  <div class="dfd-wrap" style="margin-top:32px">
+    <div class="dfd-header">
+      <span class="dfd-header-title">📊 Diagrama de Flujo de Datos — Captura de Prófugo Inter-Provincial</span>
+      <span class="dfd-header-sub">Tiempo total objetivo: &lt; 8 segundos</span>
+    </div>
+    <canvas id="dfdCanvas" height="320"></canvas>
+  </div>
+</section>
+
+<!-- DATA FLOWS TABLE -->
+<section class="section">
+  <div class="section-label">Flujos de datos</div>
+  <div class="section-title">Comunicación entre Nodos</div>
+  <div class="section-sub">Todos los endpoints requieren token HMAC. Comunicación inter-provincial adicional protegida con mTLS.</div>
+
+  <div style="background:var(--navy2);border:1px solid var(--bd);border-radius:var(--r);overflow:hidden">
+    <table class="flow-table">
+      <thead>
+        <tr><th>Origen</th><th>Destino</th><th>Endpoint</th><th>Propósito</th><th>Latencia</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="dot" style="background:var(--cyan)"></span>Comisaría</td>
+          <td><span class="dot" style="background:#4da8ff"></span>Nodo Provincial</td>
+          <td class="mono">POST /api/sync/push-sync</td>
+          <td>Sync detenidos, warrants cada 30s</td>
+          <td class="mono">&lt; 1s</td>
+        </tr>
+        <tr>
+          <td><span class="dot" style="background:var(--cyan)"></span>Comisaría</td>
+          <td><span class="dot" style="background:#4da8ff"></span>Nodo Provincial</td>
+          <td class="mono">GET /provincial/verificar/{dni}</td>
+          <td>Verificación rápida warrant local</td>
+          <td class="mono">&lt; 1s</td>
+        </tr>
+        <tr>
+          <td><span class="dot" style="background:var(--cyan)"></span>Comisaría</td>
+          <td><span class="dot" style="background:#4da8ff"></span>Nodo Provincial</td>
+          <td class="mono">POST /provincial/verificar-nacional</td>
+          <td>Escala a central si no hay resultado local</td>
+          <td class="mono">&lt; 8s</td>
+        </tr>
+        <tr>
+          <td><span class="dot" style="background:#4da8ff"></span>Nodo Provincial</td>
+          <td><span class="dot" style="background:var(--amber)"></span>Ministerio Central</td>
+          <td class="mono">POST /api/nacional/verificar</td>
+          <td>Resolución inter-provincial</td>
+          <td class="mono">&lt; 5s</td>
+        </tr>
+        <tr>
+          <td><span class="dot" style="background:var(--amber)"></span>Ministerio Central</td>
+          <td><span class="dot" style="background:#4da8ff"></span>Nodo Emisor</td>
+          <td class="mono">GET /provincial/expediente/{uuid}</td>
+          <td>Recuperar expediente completo del sujeto</td>
+          <td class="mono">&lt; 3s</td>
+        </tr>
+        <tr>
+          <td><span class="dot" style="background:var(--amber)"></span>Ministerio Central</td>
+          <td><span class="dot" style="background:#4da8ff"></span>Todas las provincias</td>
+          <td class="mono">POST /provincial/recibir-alerta</td>
+          <td>Propagación alerta prófugo (paralelo)</td>
+          <td class="mono">&lt; 3s</td>
+        </tr>
+        <tr>
+          <td><span class="dot" style="background:#4da8ff"></span>Nodo Provincial</td>
+          <td><span class="dot" style="background:var(--cyan)"></span>Todas comisarías</td>
+          <td class="mono">POST /api/sync/recibir-alerta-profugo</td>
+          <td>Retransmisión alerta a estaciones locales</td>
+          <td class="mono">&lt; 2s</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- TECH STACK -->
+<section class="section">
+  <div class="section-label">Stack tecnológico</div>
+  <div class="section-title">Tecnología Utilizada</div>
+  <div class="section-sub">Todo código abierto. Sin licencias comerciales. Diseñado para hardware de bajo costo disponible localmente.</div>
+
+  <div class="tech-grid">
+    <div class="tech-item">
+      <div class="tech-icon">🐍</div>
+      <div><div class="tech-name">Flask 3 + Gunicorn</div><div class="tech-role">Backend Python. App factory pattern, blueprints por dominio, Jinja2 templates.</div></div>
+    </div>
+    <div class="tech-item">
+      <div class="tech-icon">🗄️</div>
+      <div><div class="tech-name">SQLite / MySQL 8</div><div class="tech-role">SQLite en comisarías (sin servidor). MySQL en nodos provinciales y central.</div></div>
+    </div>
+    <div class="tech-item">
+      <div class="tech-icon">🔀</div>
+      <div><div class="tech-name">Nginx + mTLS</div><div class="tech-role">Proxy inverso. Comunicación inter-provincial cifrada con certificados por provincia.</div></div>
+    </div>
+    <div class="tech-item">
+      <div class="tech-icon">⚙️</div>
+      <div><div class="tech-name">APScheduler</div><div class="tech-role">Sync automático periódico. Fallback nocturno si el push en tiempo real falla.</div></div>
+    </div>
+    <div class="tech-item">
+      <div class="tech-icon">🖥️</div>
+      <div><div class="tech-name">Raspberry Pi 4 / x86</div><div class="tech-role">Pi 4 en comisarías. Mini-PC en nodos provinciales. Servidor rack en el central.</div></div>
+    </div>
+    <div class="tech-item">
+      <div class="tech-icon">📡</div>
+      <div><div class="tech-name">Ubiquiti airMAX / Fibra</div><div class="tech-role">Backbone intranet. VLAN por sistema. Sin exposición a internet público.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div style="margin-bottom:8px">
+    <strong style="color:var(--tx)">SRCN</strong> — Sistema de Registro Criminal Nacional · República de Guinea Ecuatorial
+  </div>
+  <div>Desarrollado por <strong>BP Technology</strong> para el Ministerio del Interior · 2026</div>
+  <div style="margin-top:12px;display:flex;justify-content:center;gap:20px;flex-wrap:wrap">
+    <a href="https://github.com/Angeal13/srcn-comisaria" target="_blank">srcn-comisaria</a>
+    <a href="https://github.com/Angeal13/srcn-nodo-provincial" target="_blank">srcn-nodo-provincial</a>
+    <a href="https://github.com/Angeal13/srcn-ministerio" target="_blank">srcn-ministerio</a>
+    <a href="https://github.com/Angeal13/srcn-annobon" target="_blank">srcn-annobon</a>
+  </div>
+  <div style="margin-top:16px;font-size:.68rem;color:var(--tss);letter-spacing:1px">
+    USO OFICIAL RESTRINGIDO — ACCESO NO AUTORIZADO PROHIBIDO
+  </div>
+</footer>
+
+<script>
+// ── DFD CANVAS ──────────────────────────────────────────────────
+const canvas = document.getElementById('dfdCanvas');
+const ctx    = canvas.getContext('2d');
+const F      = "'Space Grotesk', sans-serif";
+const FM     = "'JetBrains Mono', monospace";
+
+function resize() {
+  canvas.width  = canvas.offsetWidth;
+  canvas.height = 320;
+  draw();
+}
+
+function lerp(a,b,t){return a+(b-a)*t}
+function hex(color, alpha) {
+  const r=parseInt(color.slice(1,3),16),g=parseInt(color.slice(3,5),16),b=parseInt(color.slice(5,7),16);
+  return `rgba(${r},${g},${b},${alpha})`;
+}
+
+// Particle system
+class Particle {
+  constructor(path,color,label,speed){
+    this.path=path; this.color=color; this.label=label;
+    this.speed=speed||1.2; this.t=Math.random(); this.done=false;
+    this.trail=[];
+  }
+  update(){
+    this.t+=this.speed*0.003;
+    const pos=this.getPos(this.t);
+    this.trail.push({...pos});
+    if(this.trail.length>14)this.trail.shift();
+    if(this.t>=1){this.t=0;}
+  }
+  getPos(t){
+    t=Math.min(1,t);
+    const seg=Math.floor(t*(this.path.length-1));
+    const frac=(t*(this.path.length-1))-seg;
+    const a=this.path[Math.min(seg,this.path.length-2)];
+    const b=this.path[Math.min(seg+1,this.path.length-1)];
+    return{x:lerp(a.x,b.x,frac),y:lerp(a.y,b.y,frac)};
+  }
+  draw(ctx){
+    const pos=this.getPos(this.t);
+    this.trail.forEach((p,i)=>{
+      ctx.beginPath();ctx.arc(p.x,p.y,2.5,0,Math.PI*2);
+      ctx.fillStyle=hex(this.color,(i/this.trail.length)*0.4);ctx.fill();
+    });
+    const g=ctx.createRadialGradient(pos.x,pos.y,0,pos.x,pos.y,10);
+    g.addColorStop(0,hex(this.color,0.7));g.addColorStop(1,hex(this.color,0));
+    ctx.beginPath();ctx.arc(pos.x,pos.y,10,0,Math.PI*2);
+    ctx.fillStyle=g;ctx.fill();
+    ctx.beginPath();ctx.arc(pos.x,pos.y,4,0,Math.PI*2);
+    ctx.fillStyle=hex(this.color,0.9);ctx.fill();
+    if(this.label){
+      ctx.font=`500 9px ${FM}`;
+      ctx.fillStyle=hex(this.color,0.8);
+      ctx.fillText(this.label,pos.x+6,pos.y-6);
+    }
+  }
+}
+
+function drawNode(x,y,w,h,color,title,sub,icon){
+  ctx.beginPath();
+  ctx.roundRect(x-w/2,y-h/2,w,h,6);
+  ctx.fillStyle='#101e34';ctx.fill();
+  ctx.strokeStyle=hex(color,0.5);ctx.lineWidth=1.5;
+  ctx.beginPath();ctx.roundRect(x-w/2,y-h/2,w,h,6);ctx.stroke();
+  ctx.beginPath();ctx.roundRect(x-w/2,y-h/2,w,3,6);
+  ctx.fillStyle=hex(color,0.8);ctx.fill();
+  const g=ctx.createRadialGradient(x,y,0,x,y,w*0.6);
+  g.addColorStop(0,hex(color,0.04));g.addColorStop(1,hex(color,0));
+  ctx.beginPath();ctx.roundRect(x-w/2,y-h/2,w,h,6);ctx.fillStyle=g;ctx.fill();
+  ctx.font=`13px serif`;ctx.textAlign='center';ctx.fillText(icon,x,y-h/2+18);
+  ctx.font=`600 11px ${F}`;ctx.fillStyle='#dce8f8';ctx.textAlign='center';
+  ctx.fillText(title,x,y+2);
+  if(sub){ctx.font=`400 9px ${FM}`;ctx.fillStyle='#6a8aaa';ctx.fillText(sub,x,y+14);}
+}
+
+function drawEdge(x1,y1,x2,y2,color,dashed){
+  ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);
+  ctx.strokeStyle=hex(color,0.18);ctx.lineWidth=1.5;
+  if(dashed)ctx.setLineDash([4,4]);else ctx.setLineDash([]);
+  ctx.stroke();ctx.setLineDash([]);
+}
+
+let particles=[];
+let frame=0;
+
+function initParticles(){
+  const W=canvas.width, H=canvas.height;
+  const cx=W/2, cy=H/2;
+
+  const comisaria  ={x:cx-340, y:cy};
+  const provincial ={x:cx-120, y:cy};
+  const central    ={x:cx+100, y:cy};
+  const emisor     ={x:cx+100, y:cy-90};
+  const target     ={x:cx+300, y:cy};
+
+  particles=[
+    new Particle([{x:comisaria.x,y:comisaria.y},{x:provincial.x,y:provincial.y}],'#00c8f0','DNI?',1.2),
+    new Particle([{x:provincial.x,y:provincial.y},{x:central.x,y:central.y}],'#4da8ff','→ nacional',1.0),
+    new Particle([{x:central.x,y:central.y},{x:emisor.x,y:emisor.y}],'#e08820','GET warrant',0.9),
+    new Particle([{x:emisor.x,y:emisor.y},{x:central.x,y:central.y}],'#e03030','MATCH!',1.1),
+    new Particle([{x:central.x,y:central.y},{x:provincial.x,y:provincial.y}],'#e03030','DETENER',1.2),
+    new Particle([{x:provincial.x,y:provincial.y},{x:comisaria.x,y:comisaria.y}],'#e03030','DETENER!',1.3),
+    new Particle([{x:central.x,y:central.y},{x:target.x,y:target.y}],'#e03030','ALERTA',1.0),
+  ];
+}
+
+function draw(){
+  const W=canvas.width, H=canvas.height;
+  ctx.clearRect(0,0,W,H);
+
+  // Grid
+  ctx.strokeStyle='rgba(255,255,255,0.02)';ctx.lineWidth=1;
+  for(let x=0;x<W;x+=40){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
+  for(let y=0;y<H;y+=40){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
+
+  if(W<400){return;} // skip draw on tiny screens
+
+  const cx=W/2, cy=H/2;
+  const comisaria  ={x:cx-340, y:cy};
+  const provincial ={x:cx-120, y:cy};
+  const central    ={x:cx+100, y:cy};
+  const emisor     ={x:cx+100, y:cy-90};
+  const target     ={x:cx+300, y:cy};
+
+  // Edges
+  drawEdge(comisaria.x,comisaria.y,provincial.x,provincial.y,'#00c8f0');
+  drawEdge(provincial.x,provincial.y,central.x,central.y,'#4da8ff');
+  drawEdge(central.x,central.y,emisor.x,emisor.y,'#e08820',true);
+  drawEdge(central.x,central.y,target.x,target.y,'#e03030',true);
+
+  // Step labels
+  ctx.font=`500 9px ${FM}`;ctx.textAlign='center';
+  const midpoints=[
+    {x:(comisaria.x+provincial.x)/2,y:cy-16,t:'① Consulta DNI',c:'#00c8f0'},
+    {x:(provincial.x+central.x)/2,y:cy-16,t:'② Escala nacional',c:'#4da8ff'},
+    {x:cx+100,y:cy-50,t:'③ Fetch expediente',c:'#e08820'},
+    {x:(central.x+target.x)/2,y:cy-16,t:'④ Alerta push',c:'#e03030'},
+  ];
+  midpoints.forEach(m=>{
+    ctx.fillStyle=m.c;ctx.fillText(m.t,m.x,m.y);
+  });
+
+  // Nodes
+  drawNode(comisaria.x,comisaria.y,130,58,'#00c8f0','Com. Bata (Litoral)','Detenido: OBAMA, P.','👮');
+  drawNode(provincial.x,provincial.y,130,58,'#4da8ff','Nodo Litoral','10.10.2.1','🏛️');
+  drawNode(central.x,central.y,130,58,'#e08820','Ministerio Central','10.0.0.1','🏛️');
+  drawNode(emisor.x,emisor.y,130,52,'#e03030','Nodo Bioko Norte','warrant activo','⚖️');
+  drawNode(target.x,target.y,130,58,'#e03030','Otras Provincias','alerta propagada','🚨');
+
+  // Time label
+  ctx.font=`600 10px ${FM}`;ctx.fillStyle='rgba(224,48,48,0.6)';ctx.textAlign='center';
+  ctx.fillText('< 8 segundos total',cx,H-16);
+
+  // Particles
+  particles.forEach(p=>{p.update();p.draw(ctx);});
+  frame++;
+  requestAnimationFrame(draw);
+}
+
+window.addEventListener('load',()=>{
+  resize();
+  initParticles();
+  draw();
+});
+window.addEventListener('resize',()=>{
+  resize();
+  initParticles();
+});
+</script>
+</body>
+</html>

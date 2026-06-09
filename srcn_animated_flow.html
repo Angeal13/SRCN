@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SRCN — Sistema de Registro Criminal Nacional · Guinea Ecuatorial</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#07090f;--bg2:#0b0e18;--bg3:#0f1420;--bg4:#141a2a;
+  --g:#00d4ff;--g2:#0099cc;--g3:#33ddff;--gp:rgba(0,212,255,.1);
+  --b:#4da8ff;--bp:rgba(77,168,255,.1);
+  --o:#ffaa2a;--op:rgba(255,170,42,.1);
+  --r:#ff4466;--rp:rgba(255,68,102,.1);
+  --p:#c084fc;--pp:rgba(192,132,252,.1);
+  --t:#2dd4bf;--tp:rgba(45,212,191,.1);
+  --y:#facc15;--yp:rgba(250,204,21,.1);
+  --w:#e2eaf5;
+  --tx:#dce8f8;--ts:#6a7f9a;--tss:#2f3f58;
+  --bd:rgba(255,255,255,.07);
+  --f:'Space Grotesk',sans-serif;--fm:'JetBrains Mono',monospace
+}
+html,body{height:100%;font-family:var(--f);background:var(--bg);color:var(--tx)}
+body{display:flex;flex-direction:column;overflow:hidden}
+
+/* ── HEADER STRIP ── */
+.sys-header{
+  flex-shrink:0;
+  background:var(--bg2);
+  border-bottom:1px solid rgba(0,212,255,0.15);
+  padding:8px 20px;
+  display:flex;align-items:center;gap:14px;
+}
+.sys-badge{
+  font-family:var(--fm);font-size:10px;font-weight:500;
+  color:var(--bg);background:var(--g);
+  padding:3px 8px;border-radius:3px;letter-spacing:1px;
+  flex-shrink:0;
+}
+.sys-name{font-size:13px;font-weight:600;letter-spacing:-.2px;color:var(--tx);}
+.sys-sub{font-size:10px;color:var(--ts);margin-left:auto;font-family:var(--fm);}
+.sys-dot{width:6px;height:6px;border-radius:50%;background:var(--g);animation:pulse 2s infinite;flex-shrink:0;}
+@keyframes pulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(0,212,255,.4)}50%{opacity:.7;box-shadow:0 0 0 5px rgba(0,212,255,0)}}
+
+/* ── NAV ── */
+nav{flex-shrink:0;display:flex;align-items:stretch;background:var(--bg2);border-bottom:1px solid var(--bd);padding:0 20px;overflow-x:auto}
+.tab{padding:13px 16px;font-size:11.5px;font-weight:500;color:var(--ts);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:all .2s;letter-spacing:.3px}
+.tab:hover{color:var(--tx)}
+.tab.on{color:var(--g);border-bottom-color:var(--g)}
+.tab-lbl{font-size:9px;font-weight:400;color:var(--tss);display:block;margin-top:1px;letter-spacing:.5px}
+
+/* ── PAGE ── */
+.page{display:none;flex:1;overflow:hidden;position:relative}
+.page.on{display:flex;flex-direction:column}
+.page-hdr{padding:14px 22px 10px;border-bottom:1px solid var(--bd);flex-shrink:0}
+.page-title{font-size:18px;font-weight:600;letter-spacing:-.3px}
+.page-sub{font-size:11.5px;color:var(--ts);margin-top:4px;line-height:1.65}
+.canvas-wrap{flex:1;position:relative;overflow:hidden}
+canvas{position:absolute;inset:0;width:100%!important;height:100%!important}
+
+/* ── LEGEND ── */
+.legend{position:absolute;bottom:14px;left:16px;display:flex;flex-wrap:wrap;gap:7px;z-index:10}
+.leg{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--ts);background:rgba(7,9,15,.85);padding:4px 8px;border-radius:4px;border:1px solid var(--bd)}
+.leg-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+
+/* ── INFO PANEL ── */
+.info-panel{position:absolute;top:14px;right:14px;width:220px;background:var(--bg2);border:1px solid var(--bd);border-radius:8px;padding:12px;z-index:10;font-size:11px}
+.info-title{font-size:11px;font-weight:600;color:var(--g);margin-bottom:8px;letter-spacing:.5px;text-transform:uppercase}
+.info-row{display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid var(--bd);color:var(--ts)}
+.info-row:last-child{border-bottom:none}
+.info-val{color:var(--tx);font-family:var(--fm);font-size:10px}
+
+/* ── STEP PANEL ── */
+.steps{position:absolute;bottom:14px;right:14px;width:240px;background:var(--bg2);border:1px solid var(--bd);border-radius:8px;padding:12px;z-index:10}
+.step-title{font-size:10px;font-weight:600;color:var(--g);margin-bottom:8px;letter-spacing:.5px;text-transform:uppercase}
+.step-item{display:flex;gap:8px;padding:4px 0;font-size:11px;color:var(--tss);transition:color .3s}
+.step-item.active-step{color:var(--tx)}
+.step-num{font-family:var(--fm);font-size:10px;color:var(--tss);flex-shrink:0;padding-top:1px}
+.step-item.active-step .step-num{color:var(--g)}
+
+/* ── PACKET LOG ── */
+.pkt-log{position:absolute;top:14px;left:14px;width:210px;background:var(--bg2);border:1px solid var(--bd);border-radius:8px;padding:10px;z-index:10;max-height:190px;overflow:hidden}
+.pkt-log-title{font-size:10px;font-weight:600;color:var(--g);margin-bottom:6px;letter-spacing:.5px;text-transform:uppercase}
+.pkt-entry{font-family:var(--fm);font-size:9px;color:var(--ts);padding:2px 0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pkt-entry.new{color:var(--g)}
+
+/* ── CLASSIFICATION BADGE ── */
+.classif{position:absolute;top:14px;right:250px;z-index:10;}
+.classif-inner{font-family:var(--fm);font-size:9px;font-weight:500;color:var(--r);
+  border:1px solid rgba(255,68,102,0.4);background:rgba(255,68,102,0.08);
+  padding:4px 10px;border-radius:4px;letter-spacing:1px;}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="sys-header">
+  <div class="sys-dot"></div>
+  <div class="sys-badge">SRCN</div>
+  <div class="sys-name">Sistema de Registro Criminal Nacional — Guinea Ecuatorial</div>
+  <div class="sys-sub">MINISTERIO DEL INTERIOR · SEGURIDAD NACIONAL · INTRANET NACIONAL</div>
+</div>
+
+<nav>
+  <div class="tab on" onclick="goPage(0,this)">A — Nodo Comisaría<span class="tab-lbl">FLUJO INTERNO</span></div>
+  <div class="tab" onclick="goPage(1,this)">B — Comisaría ↔ Provincia<span class="tab-lbl">INTRANET PROVINCIAL</span></div>
+  <div class="tab" onclick="goPage(2,this)">C — Ministerio ↔ Provincias<span class="tab-lbl">BÚSQUEDA NACIONAL</span></div>
+  <div class="tab" onclick="goPage(3,this)">D — Prófugo Inter-Provincial<span class="tab-lbl">FLUJO DE CAPTURA</span></div>
+  <div class="tab" onclick="goPage(4,this)">E — Resumen General<span class="tab-lbl">VISTA COMPLETA</span></div>
+</nav>
+
+<!-- PAGE A -->
+<div class="page on" id="page0">
+  <div class="page-hdr">
+    <div class="page-title">A — Flujo Interno del Nodo Comisaría</div>
+    <div class="page-sub">Datos que fluyen dentro del mini-PC de la comisaría: terminales de agentes, lector biométrico, base de datos local SQLite y motor de sincronización provincial. Sin internet — solo intranet de la comisaría.</div>
+  </div>
+  <div class="canvas-wrap">
+    <canvas id="cvA"></canvas>
+    <div class="pkt-log" id="logA"><div class="pkt-log-title">Eventos activos</div></div>
+    <div class="legend" id="legA"></div>
+    <div class="steps" id="stepsA"></div>
+    <div class="classif"><div class="classif-inner">USO OFICIAL RESTRINGIDO</div></div>
+  </div>
+</div>
+
+<!-- PAGE B -->
+<div class="page" id="page1">
+  <div class="page-hdr">
+    <div class="page-title">B — Comisaría ↔ Nodo Provincial</div>
+    <div class="page-sub">Comunicación entre los mini-PCs de las comisarías y el nodo provincial. Red intranet exclusiva — sin internet público. Consultas de antecedentes y órdenes de arresto en tiempo real dentro de la provincia.</div>
+  </div>
+  <div class="canvas-wrap">
+    <canvas id="cvB"></canvas>
+    <div class="pkt-log" id="logB"><div class="pkt-log-title">Eventos activos</div></div>
+    <div class="legend" id="legB"></div>
+    <div class="steps" id="stepsB"></div>
+  </div>
+</div>
+
+<!-- PAGE C -->
+<div class="page" id="page2">
+  <div class="page-hdr">
+    <div class="page-title">C — Ministerio del Interior ↔ Nodos Provinciales</div>
+    <div class="page-sub">Servidor central del Ministerio en Malabo coordina búsquedas nacionales de antecedentes, emite alertas de fugitivos a todas las provincias y gestiona órdenes de arresto inter-provinciales bajo mTLS.</div>
+  </div>
+  <div class="canvas-wrap">
+    <canvas id="cvC"></canvas>
+    <div class="pkt-log" id="logC"><div class="pkt-log-title">Eventos activos</div></div>
+    <div class="legend" id="legC"></div>
+    <div class="steps" id="stepsC"></div>
+  </div>
+</div>
+
+<!-- PAGE D -->
+<div class="page" id="page3">
+  <div class="page-hdr">
+    <div class="page-title">D — Captura de Prófugo Inter-Provincial</div>
+    <div class="page-sub">Sospechoso detenido en Litoral (Bata) — orden de arresto activa en Bioko Norte (Malabo). Izquierda: flujo intra-provincial rápido (intranet, segundos). Derecha: resolución inter-provincial vía Ministerio Central.</div>
+  </div>
+  <div class="canvas-wrap">
+    <canvas id="cvD"></canvas>
+    <div class="pkt-log" id="logD"><div class="pkt-log-title">Eventos activos</div></div>
+    <div class="legend" id="legD"></div>
+  </div>
+</div>
+
+<!-- PAGE E -->
+<div class="page" id="page4">
+  <div class="page-hdr">
+    <div class="page-title">E — Resumen: Flujo Completo Comisarías → Central → Seguridad Nacional</div>
+    <div class="page-sub">Vista panorámica de toda la red SRCN. Detenciones en comisarías → nodos provinciales → servidor central → alertas de fugitivos nacionales → Ministerio del Interior y Fiscalía.</div>
+  </div>
+  <div class="canvas-wrap">
+    <canvas id="cvE"></canvas>
+    <div class="pkt-log" id="logE"><div class="pkt-log-title">Eventos activos</div></div>
+    <div class="legend" id="legE"></div>
+  </div>
+</div>
+
+<script>
+// ─── UTILITIES ───────────────────────────────────────────────
+const C={
+  g:'#00d4ff',g2:'#0099cc',g3:'#33ddff',
+  b:'#4da8ff',o:'#ffaa2a',r:'#ff4466',
+  p:'#c084fc',t:'#2dd4bf',y:'#facc15',
+  ts:'#6a7f9a',tss:'#2f3f58',
+  bg:'#07090f',bg2:'#0b0e18',bg3:'#0f1420',bg4:'#141a2a',
+  tx:'#dce8f8'
+};
+const F="'Space Grotesk',sans-serif";
+const FM="'JetBrains Mono',monospace";
+
+function lerp(a,b,t){return a+(b-a)*t;}
+function hex(color,alpha){
+  const r=parseInt(color.slice(1,3),16),g=parseInt(color.slice(3,5),16),b=parseInt(color.slice(5,7),16);
+  return `rgba(${r},${g},${b},${alpha})`;
+}
+
+class Particle{
+  constructor(path,color,label,speed,size,loop){
+    this.path=path;this.color=color;this.label=label;
+    this.speed=speed||1.2;this.size=size||5;this.loop=loop!==false;
+    this.t=Math.random();this.done=false;this.alpha=1;
+    this.trail=[];
+  }
+  update(){
+    this.t+=this.speed*0.004;
+    const pos=this.getPos(this.t);
+    this.trail.push({...pos,a:1});
+    if(this.trail.length>18)this.trail.shift();
+    if(this.t>=1){if(this.loop)this.t=0;else this.done=true;}
+  }
+  getPos(t){
+    t=Math.min(1,t);
+    const seg=Math.floor(t*(this.path.length-1));
+    const frac=(t*(this.path.length-1))-seg;
+    const a=this.path[Math.min(seg,this.path.length-2)];
+    const b=this.path[Math.min(seg+1,this.path.length-1)];
+    return{x:lerp(a.x,b.x,frac),y:lerp(a.y,b.y,frac)};
+  }
+  draw(ctx){
+    const pos=this.getPos(this.t);
+    this.trail.forEach((p,i)=>{
+      const fa=(i/this.trail.length)*0.4*this.alpha;
+      ctx.beginPath();ctx.arc(p.x,p.y,this.size*0.5,0,Math.PI*2);
+      ctx.fillStyle=hex(this.color,fa);ctx.fill();
+    });
+    const g=ctx.createRadialGradient(pos.x,pos.y,0,pos.x,pos.y,this.size*3);
+    g.addColorStop(0,hex(this.color,0.6*this.alpha));
+    g.addColorStop(1,hex(this.color,0));
+    ctx.beginPath();ctx.arc(pos.x,pos.y,this.size*3,0,Math.PI*2);
+    ctx.fillStyle=g;ctx.fill();
+    ctx.beginPath();ctx.arc(pos.x,pos.y,this.size,0,Math.PI*2);
+    ctx.fillStyle=hex(this.color,this.alpha);ctx.fill();
+    if(this.label&&this.alpha>0.5){
+      ctx.font=`500 9px ${FM}`;
+      ctx.fillStyle=hex(this.color,this.alpha);
+      ctx.fillText(this.label,pos.x+this.size+2,pos.y-this.size-2);
+    }
+  }
+}
+
+function drawNode(ctx,x,y,w,h,color,title,subtitle,icon,rounding){
+  rounding=rounding||8;
+  ctx.beginPath();roundRect(ctx,x-w/2,y-h/2,w,h,rounding);
+  ctx.fillStyle=C.bg3;ctx.fill();
+  ctx.strokeStyle=hex(color,0.5);ctx.lineWidth=1.5;
+  ctx.beginPath();roundRect(ctx,x-w/2,y-h/2,w,h,rounding);ctx.stroke();
+  ctx.beginPath();roundRect(ctx,x-w/2,y-h/2,w,3,rounding);
+  ctx.fillStyle=hex(color,0.8);ctx.fill();
+  const g=ctx.createRadialGradient(x,y,0,x,y,w*0.7);
+  g.addColorStop(0,hex(color,0.05));g.addColorStop(1,hex(color,0));
+  ctx.beginPath();roundRect(ctx,x-w/2,y-h/2,w,h,rounding);
+  ctx.fillStyle=g;ctx.fill();
+  ctx.font=`14px serif`;ctx.textAlign='center';ctx.fillText(icon,x,y-h/2+20);
+  ctx.font=`600 11px ${F}`;ctx.fillStyle=C.tx;ctx.textAlign='center';ctx.fillText(title,x,y+2);
+  if(subtitle){ctx.font=`400 9px ${FM}`;ctx.fillStyle=C.ts;ctx.fillText(subtitle,x,y+14);}
+}
+
+function drawEdge(ctx,x1,y1,x2,y2,color,dashed){
+  ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);
+  ctx.strokeStyle=hex(color,0.2);ctx.lineWidth=1.5;
+  if(dashed)ctx.setLineDash([4,4]);else ctx.setLineDash([]);
+  ctx.stroke();ctx.setLineDash([]);
+}
+
+function roundRect(ctx,x,y,w,h,r){
+  ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.quadraticCurveTo(x+w,y,x+w,y+r);
+  ctx.lineTo(x+w,y+h-r);ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
+  ctx.lineTo(x+r,y+h);ctx.quadraticCurveTo(x,y+h,x,y+h-r);
+  ctx.lineTo(x,y+r);ctx.quadraticCurveTo(x,y,x+r,y);ctx.closePath();
+}
+
+function addLog(id,msg,color){
+  const el=document.getElementById(id);
+  if(!el)return;
+  const d=document.createElement('div');
+  d.className='pkt-entry new';
+  d.style.color=color||C.g;
+  d.textContent='→ '+msg;
+  el.appendChild(d);
+  setTimeout(()=>d.classList.remove('new'),500);
+  while(el.children.length>9)el.removeChild(el.children[1]);
+}
+
+function setLegend(id,items){
+  const el=document.getElementById(id);
+  if(!el)return;
+  el.innerHTML=items.map(([c,l])=>`<div class="leg"><div class="leg-dot" style="background:${c}"></div>${l}</div>`).join('');
+}
+
+function setSteps(id,steps,active){
+  const el=document.getElementById(id);
+  if(!el)return;
+  el.innerHTML=`<div class="step-title">Flujo activo</div>`+
+    steps.map((s,i)=>`<div class="step-item ${i===active?'active-step':''}"><span class="step-num">${i+1}.</span><span>${s}</span></div>`).join('');
+}
+
+// ─── PAGE A: COMISARÍA INTERNAL NODE ─────────────────────────
+function initA(){
+  const cv=document.getElementById('cvA');
+  const ctx=cv.getContext('2d');
+  let W,H,particles=[],frame=0,stepIdx=0,stepTimer=0;
+  function resize(){W=cv.width=cv.offsetWidth;H=cv.height=cv.offsetHeight;}
+  resize();window.addEventListener('resize',resize);
+
+  setLegend('legA',[
+    [C.g,'Registro de detenido / booking'],
+    [C.b,'Consulta de antecedentes'],
+    [C.o,'Orden de arresto / warrant'],
+    [C.p,'Huella dactilar / biometría'],
+    [C.t,'Informe / PDF generado'],
+    [C.r,'Alerta de prófugo'],
+  ]);
+
+  const steps=[
+    'Agente registra detenido en terminal',
+    'Validación JWT + rol de acceso',
+    'INSERT en SQLite local (comisaría)',
+    'Hash dactilar comparado con índice local',
+    'Comprobación de órdenes activas locales',
+    'Motor sync encola hacia nodo provincial',
+    'PDF del parte de detención generado',
+    'Respuesta confirmación al terminal del agente',
+  ];
+
+  function nodes(){
+    const cx=W/2,cy=H/2;
+    return {
+      term1:{x:cx-360,y:cy-140,w:118,h:56,color:C.g,icon:'🖥️',title:'Terminal — Agente 1',sub:'registro / booking'},
+      term2:{x:cx-360,y:cy,w:118,h:56,color:C.b,icon:'🖥️',title:'Terminal — Agente 2',sub:'consulta antec.'},
+      biom:{x:cx-360,y:cy+140,w:118,h:56,color:C.p,icon:'🔏',title:'Lector Biométrico',sub:'huella dactilar USB'},
+      jefe:{x:cx-360,y:cy-280,w:118,h:56,color:C.o,icon:'👮',title:'Terminal — Jefe',sub:'supervisor / warrants'},
+      nginx:{x:cx-140,y:cy-70,w:110,h:56,color:C.ts,icon:'🔀',title:'Nginx',sub:'Proxy HTTP'},
+      flask:{x:cx-140,y:cy+70,w:110,h:56,color:C.ts,icon:'🐍',title:'Flask / Gunicorn',sub:'App server'},
+      db:{x:cx+70,y:cy-70,w:114,h:56,color:C.b,icon:'🗄️',title:'SQLite Local',sub:'BD comisaría'},
+      sync:{x:cx+70,y:cy+90,w:114,h:56,color:C.p,icon:'⚙️',title:'Motor Sync',sub:'APScheduler'},
+      warrant:{x:cx+70,y:cy-190,w:114,h:56,color:C.o,icon:'⚖️',title:'Módulo Warrants',sub:'Órdenes de arresto'},
+      pdf:{x:cx+280,y:cy-70,w:114,h:56,color:C.t,icon:'📄',title:'PDF Generator',sub:'Partes oficiales'},
+      prov:{x:cx+290,y:cy+110,w:114,h:56,color:C.g,icon:'🏛️',title:'Nodo Provincial',sub:'→ intranet'},
+    };
+  }
+
+  function spawnParticles(){
+    const n=nodes();
+    const specs=[
+      {a:n.term1,b:n.nginx,c:C.g,l:'POST /detenido',sp:1.4},
+      {a:n.term2,b:n.nginx,c:C.b,l:'GET /antec',sp:1.2},
+      {a:n.biom,b:n.nginx,c:C.p,l:'huella_hash',sp:1.1},
+      {a:n.jefe,b:n.nginx,c:C.o,l:'PUT /warrant',sp:1.3},
+      {a:n.nginx,b:n.flask,c:C.ts,l:'HTTP',sp:1.6},
+      {a:n.flask,b:n.db,c:C.b,l:'INSERT',sp:1.5},
+      {a:n.flask,b:n.warrant,c:C.o,l:'check_warrant',sp:1.1},
+      {a:n.flask,b:n.sync,c:C.p,l:'encolar',sp:1.0},
+      {a:n.flask,b:n.pdf,c:C.t,l:'gen_parte',sp:0.9},
+      {a:n.sync,b:n.prov,c:C.g,l:'sync→',sp:0.8,loop:true},
+    ];
+    particles=[];
+    specs.forEach((s,i)=>{
+      setTimeout(()=>{
+        for(let k=0;k<2;k++){
+          const pk=new Particle([{x:s.a.x,y:s.a.y},{x:s.b.x,y:s.b.y}],s.c,s.l,s.sp+(k*.2),4.5,s.loop!==false);
+          pk.t=k*0.5;particles.push(pk);
+        }
+      },i*180);
+    });
+  }
+
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    ctx.strokeStyle='rgba(255,255,255,0.025)';ctx.lineWidth=1;
+    for(let x=0;x<W;x+=40){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
+    for(let y=0;y<H;y+=40){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
+
+    const n=nodes();
+    [[n.term1,n.nginx,C.g],[n.term2,n.nginx,C.b],[n.biom,n.nginx,C.p],
+     [n.jefe,n.nginx,C.o],[n.nginx,n.flask,C.ts],[n.flask,n.db,C.b],
+     [n.flask,n.warrant,C.o],[n.flask,n.sync,C.p],[n.flask,n.pdf,C.t],
+     [n.sync,n.prov,C.g]].forEach(([a,b,c])=>drawEdge(ctx,a.x,a.y,b.x,b.y,c));
+    drawEdge(ctx,n.db.x,n.db.y,n.flask.x,n.flask.y,C.g,true);
+
+    Object.values(n).forEach(nd=>drawNode(ctx,nd.x,nd.y,nd.w,nd.h,nd.color,nd.title,nd.sub,nd.icon));
+
+    // Intranet boundary
+    const bx=n.term1.x-72,by=n.jefe.y-50;
+    const bw=n.prov.x-bx+72,bh=n.prov.y-by+80;
+    ctx.beginPath();roundRect(ctx,bx,by,bw,bh,12);
+    ctx.strokeStyle='rgba(0,212,255,0.1)';ctx.setLineDash([6,4]);ctx.lineWidth=1;ctx.stroke();ctx.setLineDash([]);
+    ctx.font=`500 10px ${FM}`;ctx.fillStyle='rgba(0,212,255,0.25)';ctx.textAlign='left';
+    ctx.fillText('Intranet local comisaría — sin internet público',bx+10,by+14);
+
+    particles=particles.filter(p=>{p.update();p.draw(ctx);return !p.done;});
+    frame++;stepTimer++;
+    if(stepTimer>120){stepTimer=0;stepIdx=(stepIdx+1)%steps.length;}
+    setSteps('stepsA',steps,stepIdx);
+    if(frame%65===0){
+      const msgs=[
+        ['detenido registrado → SQLite',C.g],
+        ['huella verificada → sin match local',C.p],
+        ['warrant_check → no activa local',C.o],
+        ['parte PDF generado → Ag. Nsue',C.t],
+        ['sync encolado → nodo prov.',C.g],
+        ['antecedentes consultados → LIMPIO',C.b],
+      ];
+      const m=msgs[Math.floor(Math.random()*msgs.length)];
+      addLog('logA',m[0],m[1]);
+    }
+    requestAnimationFrame(draw);
+  }
+  spawnParticles();draw();
+}
+
+// ─── PAGE B: COMISARÍA ↔ PROVINCIAL NODE ─────────────────────
+function initB(){
+  const cv=document.getElementById('cvB');
+  const ctx=cv.getContext('2d');
+  let W,H,particles=[],frame=0,stepIdx=0,stepTimer=0;
+  function resize(){W=cv.width=cv.offsetWidth;H=cv.height=cv.offsetHeight;}
+  resize();window.addEventListener('resize',resize);
+
+  setLegend('legB',[
+    [C.g,'Sync push (comisaría → nodo)'],
+    [C.b,'Consulta antecedentes provinciales'],
+    [C.o,'Orden de arresto recibida'],
+    [C.r,'Alerta prófugo → todas las comisarías'],
+    [C.p,'Confirmación / ACK'],
+  ]);
+
+  const steps=[
+    'Comisaría POST /api/sync → nodo prov.',
+    'Nodo valida SYNC_API_TOKEN (mTLS)',
+    'INSERT detenido en BD provincial (MySQL)',
+    'Nodo verifica índice provincial de warrants',
+    'Warrant activo → ALERTA a comisaría',
+    'Nodo responde cambios desde última sync',
+    'Comisaría actualiza caché local',
+    'ACK confirmado → próxima sync en 60s',
+  ];
+
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    ctx.strokeStyle='rgba(255,255,255,0.025)';ctx.lineWidth=1;
+    for(let x=0;x<W;x+=40){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
+    for(let y=0;y<H;y+=40){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
+
+    const cx=W/2,cy=H/2;
+
+    // Provincial node (center)
+    const prov={x:cx,y:cy-20};
+    drawNode(ctx,prov.x,prov.y,140,60,C.g,'Nodo Provincial','MySQL · 10.20.0.1','🏛️');
+
+    // Comisarías around it
+    const comisarias=[
+      {x:cx-320,y:cy-150,c:C.g,t:'Comisaría Malabo 1',s:'10.20.1.10'},
+      {x:cx-320,y:cy+110,c:C.b,t:'Comisaría Malabo 2',s:'10.20.1.11'},
+      {x:cx+320,y:cy-150,c:C.t,t:'Com. Luba',s:'10.20.1.12'},
+      {x:cx+320,y:cy+110,c:C.o,t:'Com. Riaba',s:'10.20.1.13'},
+      {x:cx,y:cy+200,c:C.p,t:'Com. Moka',s:'10.20.1.14'},
+    ];
+    comisarias.forEach(c=>drawNode(ctx,c.x,c.y,128,56,c.c,c.t,c.s,'👮'));
+
+    // Warrant DB & Fugitive Alert module
+    drawNode(ctx,cx-180,cy-200,130,56,C.o,'BD Warrants','Órdenes activas','⚖️');
+    drawNode(ctx,cx+180,cy-200,130,56,C.r,'Alerta Prófugos','push → todas comis.','🚨');
+
+    // Edges comisaría → nodo
+    comisarias.forEach(c=>drawEdge(ctx,c.x,c.y,prov.x,prov.y,c.c));
+    drawEdge(ctx,prov.x,prov.y,cx-180,cy-200,C.o,true);
+    drawEdge(ctx,prov.x,prov.y,cx+180,cy-200,C.r,true);
+    comisarias.slice(0,4).forEach(c=>drawEdge(ctx,cx+180,cy-200,c.x,c.y,C.r,true));
+
+    // Intranet boundary label
+    const bx=100,by=30,bw=W-200,bh=H-60;
+    ctx.beginPath();roundRect(ctx,bx,by,bw,bh,12);
+    ctx.strokeStyle='rgba(0,212,255,0.08)';ctx.setLineDash([6,4]);ctx.lineWidth=1;ctx.stroke();ctx.setLineDash([]);
+    ctx.font=`500 10px ${FM}`;ctx.fillStyle='rgba(0,212,255,0.2)';ctx.textAlign='center';
+    ctx.fillText('INTRANET PROVINCIAL — sin internet público — Ubiquiti airMAX AC',cx,by+16);
+
+    // animate
+    particles=particles.filter(p=>{p.update();p.draw(ctx);return !p.done;});
+    frame++;stepTimer++;
+    if(stepTimer>130){stepTimer=0;stepIdx=(stepIdx+1)%steps.length;}
+    setSteps('stepsB',steps,stepIdx);
+
+    if(frame%80===0){
+      const src=comisarias[Math.floor(Math.random()*comisarias.length)];
+      // sync push
+      particles.push(new Particle([{x:src.x,y:src.y},{x:prov.x,y:prov.y}],C.g,'POST /sync',1.3,4.5,false));
+      setTimeout(()=>{
+        // warrant check
+        particles.push(new Particle([{x:prov.x,y:prov.y},{x:cx-180,y:cy-200}],C.o,'warrant?',1.1,4,false));
+        // ack back
+        setTimeout(()=>{
+          particles.push(new Particle([{x:prov.x,y:prov.y},{x:src.x,y:src.y}],C.p,'ACK+changes',1.0,4,false));
+        },400);
+        // random alert push
+        if(Math.random()>0.5){
+          setTimeout(()=>{
+            particles.push(new Particle([{x:cx+180,y:cy-200},{x:comisarias[0].x,y:comisarias[0].y}],C.r,'ALERTA!',1.2,5,false));
+          },600);
+        }
+      },400);
+      addLog('logB',`${src.s} → sync → nodo prov.`,C.g);
+    }
+    requestAnimationFrame(draw);
+  }
+  draw();
+}
+
+// ─── PAGE C: MINISTERIO ↔ PROVINCIAS ─────────────────────────
+function initC(){
+  const cv=document.getElementById('cvC');
+  const ctx=cv.getContext('2d');
+  let W,H,particles=[],frame=0,stepIdx=0,stepTimer=0;
+  function resize(){W=cv.width=cv.offsetWidth;H=cv.height=cv.offsetHeight;}
+  resize();window.addEventListener('resize',resize);
+
+  setLegend('legC',[
+    [C.g,'Sync detenidos (provincia → central)'],
+    [C.b,'Consulta antecedentes nacional'],
+    [C.o,'Warrant inter-provincial'],
+    [C.r,'Alerta prófugo nacional → todas provs.'],
+    [C.p,'Exportación Fiscalía / Juzgados'],
+    [C.t,'Dashboard nacional — Ministerio'],
+  ]);
+
+  const steps=[
+    'Provincia POST /api/nacional/sync → central',
+    'Central valida cert. mTLS provincial',
+    'INSERT en índice nacional de sujetos',
+    'Central comprueba colisión de warrants',
+    'Warrant match → ALERTA NACIONAL emitida',
+    'Alerta push a todas las 7 provincias',
+    'Fiscalía recibe exportación cifrada',
+    'Dashboard Ministerio actualizado en tiempo real',
+  ];
+
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    ctx.strokeStyle='rgba(255,255,255,0.02)';ctx.lineWidth=1;
+    for(let x=0;x<W;x+=50){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
+    for(let y=0;y<H;y+=50){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
+
+    const cx=W/2,cy=H/2;
+
+    // Central server
+    const central={x:cx,y:cy-30};
+    drawNode(ctx,central.x,central.y,160,64,C.g,'Servidor Central','Ministerio Interior · Malabo','🏛️');
+
+    // Módulos del central
+    drawNode(ctx,cx-200,cy-160,128,52,C.o,'BD Warrants Nac.','índice nacional','⚖️');
+    drawNode(ctx,cx+200,cy-160,128,52,C.r,'Motor Alertas','push fugitivos','🚨');
+    drawNode(ctx,cx,cy+140,130,52,C.p,'Fiscalía / Juzgados','exportación cifrada','⚖️');
+    drawNode(ctx,cx+260,cy+40,120,52,C.t,'Dashboard Nac.','Ministerio Interior','📊');
+
+    drawEdge(ctx,central.x,central.y,cx-200,cy-160,C.o,true);
+    drawEdge(ctx,central.x,central.y,cx+200,cy-160,C.r,true);
+    drawEdge(ctx,central.x,central.y,cx,cy+140,C.p,true);
+    drawEdge(ctx,central.x,central.y,cx+260,cy+40,C.t,true);
+
+    // Provincial nodes
+    const radius=Math.min(W,H)*0.35;
+    const provNames=[
+      {t:'Bioko Norte',s:'10.10.0.1',c:C.g},
+      {t:'Bioko Sur',s:'10.10.1.1',c:C.b},
+      {t:'Litoral',s:'10.10.2.1',c:C.t},
+      {t:'Centro Sur',s:'10.10.3.1',c:C.o},
+      {t:'Kié-Ntem',s:'10.10.4.1',c:C.p},
+      {t:'Wele-Nzas',s:'10.10.5.1',c:C.y},
+      {t:'Annobón',s:'10.10.6.1',c:C.r},
+    ];
+    const provNodes=provNames.map((p,i)=>{
+      const angle=(i/provNames.length)*Math.PI*2-Math.PI/2;
+      return{...p,x:cx+Math.cos(angle)*radius,y:(cy+60)+Math.sin(angle)*radius*0.7};
+    });
+    provNodes.forEach(p=>drawNode(ctx,p.x,p.y,112,50,p.c,p.t,p.s,'🏛️'));
+    provNodes.forEach(p=>drawEdge(ctx,p.x,p.y,central.x,central.y,p.c));
+
+    // animate
+    particles=particles.filter(p=>{p.update();p.draw(ctx);return !p.done;});
+    frame++;stepTimer++;
+    if(stepTimer>130){stepTimer=0;stepIdx=(stepIdx+1)%steps.length;}
+    setSteps('stepsC',steps,stepIdx);
+
+    if(frame%70===0){
+      const pv=provNodes[Math.floor(Math.random()*provNodes.length)];
+      particles.push(new Particle([{x:pv.x,y:pv.y},{x:central.x,y:central.y}],C.g,'epi_sync',1.2,4.5,false));
+      setTimeout(()=>{
+        particles.push(new Particle([{x:central.x,y:central.y},{x:cx-200,y:cy-160}],C.o,'warrant?',1.0,4,false));
+        if(Math.random()>0.4){
+          setTimeout(()=>{
+            const targetProv=provNodes[Math.floor(Math.random()*provNodes.length)];
+            particles.push(new Particle([{x:cx+200,y:cy-160},{x:targetProv.x,y:targetProv.y}],C.r,'FUGITIVO!',1.1,5,false));
+          },400);
+        }
+        setTimeout(()=>{
+          particles.push(new Particle([{x:central.x,y:central.y},{x:cx,y:cy+140}],C.p,'export_enc',0.9,4,false));
+        },500);
+      },500);
+      addLog('logC',`${pv.s} → sync → central`,C.g);
+    }
+    requestAnimationFrame(draw);
+  }
+  draw();
+}
+
+// ─── PAGE D: INTER-PROVINCIAL FUGITIVE CAPTURE ───────────────
+function initD(){
+  const cv=document.getElementById('cvD');
+  const ctx=cv.getContext('2d');
+  let W,H,particles=[],frame=0;
+  function resize(){W=cv.width=cv.offsetWidth;H=cv.height=cv.offsetHeight;}
+  resize();window.addEventListener('resize',resize);
+
+  setLegend('legD',[
+    [C.g,'Consulta de antecedentes'],
+    [C.b,'Expediente / historial criminal'],
+    [C.o,'Warrant / orden de arresto'],
+    [C.r,'Confirmación captura fugitivo'],
+    [C.t,'Transferencia inter-provincial'],
+  ]);
+
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    ctx.strokeStyle='rgba(255,255,255,0.02)';ctx.lineWidth=1;
+    for(let x=0;x<W;x+=40){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
+    for(let y=0;y<H;y+=40){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
+
+    const half=W/2;
+
+    // ── LEFT PANEL: INTRA-PROVINCIAL (same province) ──
+    const lC=half*0.5,lY=H/2;
+    ctx.font=`600 11px ${F}`;ctx.fillStyle=hex(C.g,0.5);ctx.textAlign='center';
+    ctx.fillText('INTRA-PROVINCIAL',lC,30);
+    ctx.font=`400 9px ${FM}`;ctx.fillStyle=C.ts;ctx.textAlign='center';
+    ctx.fillText('Bioko Norte → misma provincia (intranet, < 3s)',lC,45);
+
+    const lCom1={x:lC,y:lY-160};
+    const lNodo={x:lC,y:lY};
+    const lCom2={x:lC,y:lY+160};
+
+    drawNode(ctx,lCom1.x,lCom1.y,140,56,C.g,'Com. Malabo 1','detenido: NSUE, J.','👮');
+    drawNode(ctx,lNodo.x,lNodo.y,140,58,C.g,'Nodo Bioko Norte','10.10.0.1 · MySQL','🏛️');
+    drawNode(ctx,lCom2.x,lCom2.y,140,56,C.o,'BD Warrants Prov.','warrant: NSUE activo','⚖️');
+
+    drawEdge(ctx,lCom1.x,lCom1.y,lNodo.x,lNodo.y,C.g);
+    drawEdge(ctx,lNodo.x,lNodo.y,lCom2.x,lCom2.y,C.o);
+    drawEdge(ctx,lCom2.x,lCom2.y,lNodo.x,lNodo.y,C.r,true);
+    drawEdge(ctx,lNodo.x,lNodo.y,lCom1.x,lCom1.y,C.r,true);
+
+    // ── RIGHT PANEL: INTER-PROVINCIAL (different province) ──
+    const rC=half+half*0.5,rY=H/2;
+    ctx.font=`600 11px ${F}`;ctx.fillStyle=hex(C.r,0.5);ctx.textAlign='center';
+    ctx.fillText('INTER-PROVINCIAL',rC,30);
+    ctx.font=`400 9px ${FM}`;ctx.fillStyle=C.ts;ctx.textAlign='center';
+    ctx.fillText('Sospechoso en Litoral — warrant activo en Bioko Norte',rC,45);
+
+    const tier=(H-80)/4;
+    const rComBata={x:rC,y:80+tier*0.4};
+    const rNodoLit={x:rC-80,y:80+tier*1.2};
+    const rCentral={x:rC,y:80+tier*2.1};
+    const rNodoBioko={x:rC+80,y:80+tier*1.2};
+    const rWarrantBioko={x:rC+160,y:80+tier*3.0};
+    const rComBataOK={x:rC-160,y:80+tier*3.0};
+
+    drawNode(ctx,rComBata.x,rComBata.y,138,54,C.g,'Com. Bata (Litoral)','detenido: OBAMA, P.','👮');
+    drawNode(ctx,rNodoLit.x,rNodoLit.y,128,54,C.b,'Nodo Litoral','10.10.2.1','🏛️');
+    drawNode(ctx,rCentral.x,rCentral.y,148,58,C.o,'Ministerio Central','Servidor Nacional','🏛️');
+    drawNode(ctx,rNodoBioko.x,rNodoBioko.y,128,54,C.t,'Nodo Bioko Norte','10.10.0.1','🏛️');
+    drawNode(ctx,rWarrantBioko.x,rWarrantBioko.y,130,54,C.r,'Warrant Activo','OBAMA, P. / Bioko N.','⚖️');
+    drawNode(ctx,rComBataOK.x,rComBataOK.y,130,54,C.r,'Alerta Captura','Com. Bata → DETENER','🚨');
+
+    drawEdge(ctx,rComBata.x,rComBata.y,rNodoLit.x,rNodoLit.y,C.g);
+    drawEdge(ctx,rNodoLit.x,rNodoLit.y,rCentral.x,rCentral.y,C.b);
+    drawEdge(ctx,rCentral.x,rCentral.y,rNodoBioko.x,rNodoBioko.y,C.t);
+    drawEdge(ctx,rNodoBioko.x,rNodoBioko.y,rWarrantBioko.x,rWarrantBioko.y,C.o);
+    drawEdge(ctx,rWarrantBioko.x,rWarrantBioko.y,rCentral.x,rCentral.y,C.r,true);
+    drawEdge(ctx,rCentral.x,rCentral.y,rComBataOK.x,rComBataOK.y,C.r);
+
+    // Divider
+    ctx.beginPath();ctx.moveTo(half,20);ctx.lineTo(half,H-20);
+    ctx.strokeStyle='rgba(255,255,255,0.08)';ctx.setLineDash([]);ctx.lineWidth=1;ctx.stroke();
+
+    // Particles
+    particles=particles.filter(p=>{p.update();p.draw(ctx);return !p.done;});
+    frame++;
+
+    if(frame%100===0){
+      // Left panel: intra-provincial fast path
+      particles.push(new Particle([{x:lCom1.x,y:lCom1.y},{x:lNodo.x,y:lNodo.y}],C.g,'GET /warrant',1.3,4.5,false));
+      setTimeout(()=>{
+        particles.push(new Particle([{x:lNodo.x,y:lNodo.y},{x:lCom2.x,y:lCom2.y}],C.o,'check→',1.1,4,false));
+        setTimeout(()=>{
+          particles.push(new Particle([{x:lCom2.x,y:lCom2.y},{x:lNodo.x,y:lNodo.y}],C.r,'MATCH!',1.2,5,false));
+          setTimeout(()=>{
+            particles.push(new Particle([{x:lNodo.x,y:lNodo.y},{x:lCom1.x,y:lCom1.y}],C.r,'DETENER!',1.3,5,false));
+            addLog('logD','Bioko Norte → warrant match local → CAPTURA',C.r);
+          },350);
+        },350);
+      },350);
+
+      // Right panel: inter-provincial full path
+      setTimeout(()=>{
+        particles.push(new Particle([{x:rComBata.x,y:rComBata.y},{x:rNodoLit.x,y:rNodoLit.y}],C.g,'check_subject',1.2,4.5,false));
+        setTimeout(()=>{
+          particles.push(new Particle([{x:rNodoLit.x,y:rNodoLit.y},{x:rCentral.x,y:rCentral.y}],C.b,'→ nacional?',1.0,4,false));
+          setTimeout(()=>{
+            particles.push(new Particle([{x:rCentral.x,y:rCentral.y},{x:rNodoBioko.x,y:rNodoBioko.y}],C.t,'GET /warrant',0.9,4,false));
+            setTimeout(()=>{
+              particles.push(new Particle([{x:rNodoBioko.x,y:rNodoBioko.y},{x:rWarrantBioko.x,y:rWarrantBioko.y}],C.o,'warrant_data',1.0,4,false));
+              setTimeout(()=>{
+                particles.push(new Particle([{x:rWarrantBioko.x,y:rWarrantBioko.y},{x:rCentral.x,y:rCentral.y}],C.r,'MATCH!',1.1,5,false));
+                setTimeout(()=>{
+                  particles.push(new Particle([{x:rCentral.x,y:rCentral.y},{x:rComBataOK.x,y:rComBataOK.y}],C.r,'DETENER!',1.2,5.5,false));
+                  addLog('logD','Litoral → central → Bioko Norte → CAPTURA',C.r);
+                },350);
+              },350);
+            },350);
+          },350);
+        },350);
+      },1200);
+    }
+    requestAnimationFrame(draw);
+  }
+  draw();
+}
+
+// ─── PAGE E: FULL OVERVIEW ────────────────────────────────────
+function initE(){
+  const cv=document.getElementById('cvE');
+  const ctx=cv.getContext('2d');
+  let W,H,particles=[],frame=0;
+  function resize(){W=cv.width=cv.offsetWidth;H=cv.height=cv.offsetHeight;}
+  resize();window.addEventListener('resize',resize);
+
+  setLegend('legE',[
+    [C.g,'Datos detenidos (comisaría → provincia)'],
+    [C.b,'Expediente criminal / historial'],
+    [C.o,'Sync warrants (provincia → central)'],
+    [C.r,'Alerta prófugo → todas las provincias'],
+    [C.p,'Exportación Fiscalía / Juzgados'],
+    [C.t,'Dashboard nacional Ministerio'],
+    [C.y,'Transferencia custodia inter-provincial'],
+  ]);
+
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    ctx.strokeStyle='rgba(255,255,255,0.02)';ctx.lineWidth=1;
+    for(let x=0;x<W;x+=50){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
+    for(let y=0;y<H;y+=50){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
+
+    const cx=W/2,cy=H/2;
+    const tierH=H/5;
+
+    // Tier labels
+    const tiers=[
+      {y:tierH*0.5,label:'COMISARÍAS',sub:'estaciones policiales locales · SQLite · terminal agentes',c:C.g},
+      {y:tierH*1.5,label:'NODOS PROVINCIALES',sub:'7 provincias · MySQL · BD warrants · intranet prov.',c:C.b},
+      {y:tierH*2.5,label:'SERVIDOR CENTRAL — MINISTERIO DEL INTERIOR',sub:'índice nacional · motor alertas · warrants inter-prov.',c:C.o},
+      {y:tierH*3.5,label:'ENTIDADES EXTERNAS',sub:'Fiscalía · Juzgados · Seguridad Nacional',c:C.p},
+    ];
+    tiers.forEach(t=>{
+      ctx.beginPath();ctx.moveTo(30,t.y+20);ctx.lineTo(W-30,t.y+20);
+      ctx.strokeStyle=hex(t.c,0.06);ctx.lineWidth=1;ctx.setLineDash([4,4]);ctx.stroke();ctx.setLineDash([]);
+      ctx.font=`600 10px ${F}`;ctx.fillStyle=hex(t.c,0.4);ctx.textAlign='left';
+      ctx.fillText(t.label,36,t.y+15);
+      ctx.font=`400 9px ${FM}`;ctx.fillStyle=C.tss;ctx.fillText(t.sub,36,t.y+28);
+    });
+
+    const instY=tierH*0.5+40;
+    const insts=[
+      {x:cx-380,c:C.g,t:'Com. Malabo 1',s:'BN-001'},
+      {x:cx-230,c:C.b,t:'Com. Malabo 2',s:'BN-002'},
+      {x:cx-80,c:C.t,t:'Com. Bata',s:'LIT-001'},
+      {x:cx+70,c:C.y,t:'Com. Ebebiyín',s:'KN-001'},
+      {x:cx+220,c:C.p,t:'Com. Evinayong',s:'CS-001'},
+      {x:cx+360,c:C.o,t:'Com. Mongomo',s:'WN-001'},
+    ];
+    insts.forEach(n=>drawNode(ctx,n.x,instY,110,50,n.c,n.t,n.s,'👮'));
+
+    const provY=tierH*1.5+40;
+    const provs=[
+      {x:cx-300,c:C.g,t:'Nodo Bioko Norte',s:'10.10.0.1'},
+      {x:cx-100,c:C.b,t:'Nodo Litoral',s:'10.10.2.1'},
+      {x:cx+100,c:C.t,t:'Nodo Centro Sur',s:'10.10.3.1'},
+      {x:cx+300,c:C.p,t:'Nodo KN + WN',s:'10.10.4-5.1'},
+    ];
+    provs.forEach(n=>drawNode(ctx,n.x,provY,124,54,n.c,n.t,n.s,'🏛️'));
+
+    insts.forEach((inst,i)=>{
+      const pv=provs[Math.floor(i/1.6)%provs.length];
+      if(pv)drawEdge(ctx,inst.x,instY,pv.x,provY,inst.c);
+    });
+
+    const centY=tierH*2.5+40;
+    const central={x:cx,y:centY};
+    drawNode(ctx,central.x,central.y,158,62,C.o,'Servidor Central','Ministerio Interior · Malabo','🏛️');
+    provs.forEach(pv=>drawEdge(ctx,pv.x,provY,central.x,centY,pv.c,true));
+
+    const extY=tierH*3.5+40;
+    const exts=[
+      {x:cx-200,c:C.r,t:'Seguridad Nac.',s:'alertas prófugos'},
+      {x:cx,c:C.p,t:'Fiscalía / Juzgados',s:'exportación cifrada'},
+      {x:cx+200,c:C.t,t:'Dashboard Ministerio',s:'estadísticas nac.'},
+    ];
+    exts.forEach(n=>drawNode(ctx,n.x,extY,132,52,n.c,n.t,n.s,'⚖️'));
+    exts.forEach(n=>drawEdge(ctx,central.x,centY,n.x,extY,n.c,true));
+
+    // Annobón
+    drawNode(ctx,cx+470,instY,100,50,C.r,'Annobón','10.10.6.1','🏝️');
+    ctx.font=`400 9px ${FM}`;ctx.fillStyle=hex(C.r,0.4);ctx.textAlign='center';
+    ctx.fillText('satélite TBD',cx+470,instY+36);
+
+    particles=particles.filter(p=>{p.update();p.draw(ctx);return !p.done;});
+    frame++;
+
+    if(frame%55===0){
+      const inst=insts[Math.floor(Math.random()*insts.length)];
+      const pv=provs[Math.floor(Math.random()*provs.length)];
+      const colors=[C.g,C.b,C.y,C.t];
+      const c=colors[Math.floor(Math.random()*colors.length)];
+      const labels=['detenido','booking','warrant_check','antec_query'];
+      const l=labels[Math.floor(Math.random()*labels.length)];
+      particles.push(new Particle([{x:inst.x,y:instY},{x:pv.x,y:provY}],c,l,1.3,4,false));
+      setTimeout(()=>{
+        particles.push(new Particle([{x:pv.x,y:provY},{x:central.x,y:centY}],C.o,'warrant_sync',1.0,4,false));
+        setTimeout(()=>{
+          const ext=exts[Math.floor(Math.random()*exts.length)];
+          particles.push(new Particle([{x:central.x,y:centY},{x:ext.x,y:extY}],ext.c,'output',0.9,4,false));
+          if(Math.random()>0.6){
+            // fugitive alert broadcast
+            provs.forEach(pv2=>{
+              setTimeout(()=>particles.push(new Particle([{x:central.x,y:centY},{x:pv2.x,y:provY}],C.r,'FUGITIVO!',1.2,5,false)),Math.random()*400);
+            });
+            addLog('logE',`ALERTA NACIONAL → prófugo detectado`,C.r);
+          } else {
+            addLog('logE',`${inst.s} → ${l} → ${pv.s}`,c);
+          }
+        },500);
+      },500);
+    }
+    requestAnimationFrame(draw);
+  }
+  draw();
+}
+
+// ─── PAGE SWITCHER ────────────────────────────────────────────
+const pages=document.querySelectorAll('.page');
+const tabs=document.querySelectorAll('.tab');
+const inits=[initA,initB,initC,initD,initE];
+const initialized=[false,false,false,false,false];
+
+function goPage(i,el){
+  pages.forEach(p=>p.classList.remove('on'));
+  tabs.forEach(t=>t.classList.remove('on'));
+  pages[i].classList.add('on');
+  el.classList.add('on');
+  if(!initialized[i]){
+    initialized[i]=true;
+    setTimeout(()=>inits[i](),80);
+  }
+}
+
+window.addEventListener('load',()=>{
+  initialized[0]=true;
+  setTimeout(()=>initA(),100);
+});
+</script>
+</body>
+</html>
